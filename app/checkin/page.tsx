@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabase } from "@/lib/supabaseClient";
 
 export default function CheckinPage() {
   const [session, setSession] = useState<any>(null);
@@ -14,6 +14,7 @@ export default function CheckinPage() {
     note: "",
   });
   const today = format(new Date(), "yyyy-MM-dd");
+  const supabase = getSupabase();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -21,19 +22,20 @@ export default function CheckinPage() {
       const id = data.session?.user?.id;
       if (id) setUserId(id);
     });
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       const id = s?.user?.id;
       if (id) setUserId(id);
     });
+
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!userId) return alert("No user id");
 
-    // Ensure profile row exists to satisfy FK
     const { error: upsertErr } = await supabase
       .from("users")
       .upsert({ id: userId })
@@ -44,7 +46,6 @@ export default function CheckinPage() {
       return;
     }
 
-    // Insert or update today's check-in
     const { data: existing } = await supabase
       .from("checkins")
       .select("id")
@@ -53,7 +54,10 @@ export default function CheckinPage() {
       .maybeSingle();
 
     if (existing?.id) {
-      const { error } = await supabase.from("checkins").update(form).eq("id", existing.id);
+      const { error } = await supabase
+        .from("checkins")
+        .update(form)
+        .eq("id", existing.id);
       if (error) alert(error.message);
       else {
         alert("Check-in updated.");
@@ -71,38 +75,56 @@ export default function CheckinPage() {
     }
   }
 
-  if (!session) return <div className="rounded-lg border p-6 shadow-sm">Please sign in first.</div>;
+  if (!session)
+    return (
+      <div className="rounded-lg border p-6 shadow-sm">
+        Please sign in first.
+      </div>
+    );
 
   return (
     <div className="rounded-lg border p-6 shadow-sm max-w-xl">
       <h2 className="text-xl font-semibold mb-3">Daily Check-in</h2>
       <form onSubmit={submit} className="space-y-4">
+        {/* Mood */}
         <div>
-          <label htmlFor="mood" className="block text-sm font-medium">Mood (1-5)</label>
+          <label htmlFor="mood" className="block text-sm font-medium">
+            Mood (1-5)
+          </label>
           <input
             id="mood"
             type="number"
             min={1}
             max={5}
             value={form.mood}
-            onChange={(e) => setForm((f) => ({ ...f, mood: Number(e.target.value) }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, mood: Number(e.target.value) }))
+            }
             className="mt-1 w-full border rounded p-2"
           />
         </div>
+        {/* Stress */}
         <div>
-          <label htmlFor="stress" className="block text-sm font-medium">Stress (1-5)</label>
+          <label htmlFor="stress" className="block text-sm font-medium">
+            Stress (1-5)
+          </label>
           <input
             id="stress"
             type="number"
             min={1}
             max={5}
             value={form.stress}
-            onChange={(e) => setForm((f) => ({ ...f, stress: Number(e.target.value) }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, stress: Number(e.target.value) }))
+            }
             className="mt-1 w-full border rounded p-2"
           />
         </div>
+        {/* Hours Worked */}
         <div>
-          <label htmlFor="hours" className="block text-sm font-medium">Hours Worked</label>
+          <label htmlFor="hours" className="block text-sm font-medium">
+            Hours Worked
+          </label>
           <input
             id="hours"
             type="number"
@@ -110,12 +132,17 @@ export default function CheckinPage() {
             max={24}
             step={0.5}
             value={form.hours_worked}
-            onChange={(e) => setForm((f) => ({ ...f, hours_worked: Number(e.target.value) }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, hours_worked: Number(e.target.value) }))
+            }
             className="mt-1 w-full border rounded p-2"
           />
         </div>
+        {/* Sleep Hours */}
         <div>
-          <label htmlFor="sleep" className="block text-sm font-medium">Sleep (hours)</label>
+          <label htmlFor="sleep" className="block text-sm font-medium">
+            Sleep (hours)
+          </label>
           <input
             id="sleep"
             type="number"
@@ -123,16 +150,23 @@ export default function CheckinPage() {
             max={24}
             step={0.5}
             value={form.sleep_hours}
-            onChange={(e) => setForm((f) => ({ ...f, sleep_hours: Number(e.target.value) }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, sleep_hours: Number(e.target.value) }))
+            }
             className="mt-1 w-full border rounded p-2"
           />
         </div>
+        {/* Note */}
         <div>
-          <label htmlFor="note" className="block text-sm font-medium">Note</label>
+          <label htmlFor="note" className="block text-sm font-medium">
+            Note
+          </label>
           <textarea
             id="note"
             value={form.note}
-            onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, note: e.target.value }))
+            }
             className="mt-1 w-full border rounded p-2"
           />
         </div>
