@@ -2,11 +2,14 @@
   "name": "balance-buddy",
   "version": "0.1.0",
   "private": true,
+  {
+{
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start"
+  }
+} 
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",
