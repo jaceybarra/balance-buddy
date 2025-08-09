@@ -1,6 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
+'use client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let client: SupabaseClient | null = null;
+
+/** Create once, only on the client, at runtime */
+export function getSupabase(): SupabaseClient {
+  if (!client) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) throw new Error('Supabase env vars are missing at runtime');
+    client = createClient(url, key, {
+      auth: { persistSession: true, detectSessionInUrl: true },
+    });
+  }
+  return client;
+}
