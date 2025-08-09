@@ -61,7 +61,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Today */}
       <div className="rounded-lg border p-6 shadow-sm">
         <h2 className="text-xl font-semibold mb-3">Today</h2>
         {loading ? (
@@ -82,7 +81,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Last 7 days */}
       <div className="rounded-lg border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-3">Last 7 days</h3>
         {loading ? (
@@ -105,7 +103,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Tip of the Day */}
       <div className="rounded-lg border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-2">Tip of the Day</h3>
         <TipOfDay />
@@ -122,7 +119,6 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
 function MetricSkeleton() {
   return (
     <div className="rounded-lg border p-6 shadow-sm">
