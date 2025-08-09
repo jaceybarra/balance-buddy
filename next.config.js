@@ -1,6 +1,9 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  output: 'export',
+  images: { unoptimized: true }, // needed for export
+  trailingSlash: true,           // makes Pages routing happier
 };
-module.exports = nextConfig;
+
+export default nextConfig;
