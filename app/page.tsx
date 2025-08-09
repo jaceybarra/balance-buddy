@@ -1,8 +1,8 @@
-"use client";
-import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
-import { supabase } from "@/lib/supabaseClient";
-import Auth from "@/components/Auth";
+'use client';
+import { useEffect, useMemo, useState } from 'react';
+import { format } from 'date-fns';
+import { getSupabase } from '@/lib/supabaseClient';
+import Auth from '@/components/Auth';
 
 type Checkin = {
   id: string;
@@ -15,33 +15,31 @@ type Checkin = {
 };
 
 export default function Dashboard() {
+  const supabase = getSupabase();
   const [session, setSession] = useState<any>(null);
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [loading, setLoading] = useState(true);
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     if (!session) return;
     setLoading(true);
     supabase
-      .from("checkins")
-      .select("*")
-      .order("date", { ascending: false })
+      .from('checkins')
+      .select('*')
+      .order('date', { ascending: false })
       .limit(14)
       .then(({ data }) => setCheckins((data ?? []) as any))
       .finally(() => setLoading(false));
-  }, [session]);
+  }, [session, supabase]);
 
-  const today = useMemo(
-    () => checkins.find((r) => r.date === todayStr) ?? null,
-    [checkins, todayStr]
-  );
+  const today = useMemo(() => checkins.find((r) => r.date === todayStr) ?? null, [checkins, todayStr]);
   const last7 = useMemo(() => checkins.slice(0, 7), [checkins]);
 
   function score(c: Partial<Checkin> | null) {
@@ -68,9 +66,7 @@ export default function Dashboard() {
         <h2 className="text-xl font-semibold mb-3">Today</h2>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <MetricSkeleton />
-            <MetricSkeleton />
-            <MetricSkeleton />
+            <MetricSkeleton /><MetricSkeleton /><MetricSkeleton />
           </div>
         ) : today ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -91,9 +87,7 @@ export default function Dashboard() {
         <h3 className="text-lg font-semibold mb-3">Last 7 days</h3>
         {loading ? (
           <div className="grid md:grid-cols-7 grid-cols-2 gap-3">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <MetricSkeleton key={i} />
-            ))}
+            {Array.from({ length: 7 }).map((_, i) => <MetricSkeleton key={i} />)}
           </div>
         ) : (
           <div className="grid md:grid-cols-7 grid-cols-2 gap-3">
@@ -102,15 +96,11 @@ export default function Dashboard() {
                 <div className="text-xs text-gray-500">{c.date}</div>
                 <div className="font-semibold">Score: {score(c)}</div>
                 <div className="text-xs">
-                  Mood {c.mood ?? "-"} / Stress {c.stress ?? "-"} / Sleep {c.sleep_hours ?? "-"}h
+                  Mood {c.mood ?? '-'} / Stress {c.stress ?? '-'} / Sleep {c.sleep_hours ?? '-'}h
                 </div>
               </div>
             ))}
-            {last7.length === 0 && (
-              <div className="text-sm text-gray-500">
-                No check-ins yet. Do your first one → “Daily Check-in”.
-              </div>
-            )}
+            {last7.length === 0 && <div className="text-sm text-gray-500">No check-ins yet. Do your first one → “Daily Check-in”.</div>}
           </div>
         )}
       </div>
@@ -143,26 +133,21 @@ function MetricSkeleton() {
 }
 
 function TipOfDay() {
+  const supabase = getSupabase();
   const [tip, setTip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("tips")
-      .select("*")
-      .limit(1)
+    supabase.from('tips').select('*').limit(1)
       .then(({ data }) => setTip(data?.[0] ?? null))
       .finally(() => setLoading(false));
-  }, []);
+  }, [supabase]);
 
   if (loading) return <div className="h-6 w-64 bg-gray-200 rounded" />;
-  if (!tip) return <div className="text-sm text-gray-500">Add tips in the database to see one here.</div>;
-
+  if (!tip) return <div className="text-sm text-gray-500">Add tips in the DB to see one here.</div>;
   return (
     <div>
-      <div className="text-sm text-gray-500">
-        {tip.category} • {tip.trigger}
-      </div>
+      <div className="text-sm text-gray-500">{tip.category} • {tip.trigger}</div>
       <p className="mt-1">{tip.copy}</p>
     </div>
   );
