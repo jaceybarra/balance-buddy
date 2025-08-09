@@ -4,7 +4,6 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 let client: SupabaseClient | null = null;
 
-/** Create once, only on the client, at runtime */
 export function getSupabase(): SupabaseClient {
   if (!client) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
