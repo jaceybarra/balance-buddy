@@ -21,19 +21,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
 
-      - name: Install
-        run: npm ci
+      - name: Install deps
+        run: npm install
 
       - name: Build (Next export)
         env:
-          # These get injected into the client bundle at build time
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # These make the basePath/assetPrefix logic kick in
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: npm run build
 
       - name: Upload artifact
