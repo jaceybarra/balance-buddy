@@ -8,7 +8,17 @@
  *
  * Run: npm run db:reset
  */
+import path from 'node:path';
+import { config as loadEnv } from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+
+// Works standalone: Next reads .env.local and .env, the Prisma CLI reads .env,
+// and running this file directly reads neither unless we ask.
+loadEnv({ path: path.join(process.cwd(), '.env.local'), quiet: true });
+loadEnv({ path: path.join(process.cwd(), '.env'), quiet: true });
+if (!process.env.DATABASE_URL && process.env.NODE_ENV !== 'production') {
+  process.env.DATABASE_URL = 'file:./dev.db';
+}
 import { NFL_TEAMS } from '../src/lib/seed/nfl-teams';
 import { buildSeedSchedule, SEASON } from '../src/lib/seed/schedule';
 import { ARCHETYPE_PROFILES } from '../src/lib/seed/archetypes';

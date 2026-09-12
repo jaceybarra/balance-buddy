@@ -35,17 +35,32 @@ and trades are all priced with the rules of the league they apply to.
 
 ## Quick start
 
+Requires **Node 18.18 or newer** (`node -v`).
+
 ```bash
 npm install
-cp .env.example .env.local        # then edit — see "ESPN values" below
-npm run db:reset                  # create the SQLite db + seed both teams
-npm run dev                       # http://localhost:3000
+npm run db:reset     # create the SQLite database + seed both teams
+npm run dev          # http://localhost:3000
 ```
 
-`db:reset` seeds the **2026-09-11** snapshot of both real rosters, a full 18-week
+That's the whole setup. **No configuration file is needed to start** — the
+database defaults to `prisma/dev.db` and the app runs entirely on seeded data.
+
+`db:reset` loads the **2026-09-11** snapshot of both real rosters, a full 18-week
 NFL schedule, a free-agent pool per league, baseline projections and the action
-queue. The app is fully usable at this point with **no credentials at all** — ESPN
-and Sleeper are optional upgrades, not requirements.
+queue. ESPN and Sleeper are optional upgrades, not requirements.
+
+When you *do* want ESPN data, create an env file and fill it in:
+
+```bash
+cp .env.example .env      # or .env.local — both are read, and both are git-ignored
+```
+
+> Windows PowerShell: `Copy-Item .env.example .env`
+
+`.env` and `.env.local` are equivalent here: Next.js reads both, and
+`prisma.config.ts` loads both for the Prisma CLI. Everything in them is optional
+except `DATABASE_URL`, which already has a working local default.
 
 Other scripts:
 
