@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/refresh",
+      "comment": "Hourly wake-up. The endpoint itself reads real kickoff times and decides how much work to do, so nothing here assumes the NFL calendar.",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/refresh",
+      "comment": "Sunday: every 15 minutes from late morning through the night, covering inactives, early/late windows and SNF.",
+      "schedule": "*/15 15-23 * * 0"
+    },
+    {
+      "path": "/api/cron/refresh",
+      "comment": "Sunday overnight (Monday UTC) for the end of the late window.",
+      "schedule": "*/15 0-4 * * 1"
+    },
+    {
+      "path": "/api/cron/refresh",
+      "comment": "Thursday and Monday nights for TNF/MNF lineup locks.",
+      "schedule": "*/30 22-23 * * 4,1"
+    }
+  ]
+}

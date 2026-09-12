@@ -1,0 +1,593 @@
+// Fantasy GM — Prisma schema
+//
+// Provider: sqlite for local development. Everything here is Postgres-compatible
+// on purpose so the migration path is `provider = "postgresql"` + a new migration:
+//   * no enums        -> string columns validated by zod (src/lib/domain/enums.ts)
+//   * no Json columns -> `*Json` string columns, parsed through src/lib/json.ts
+//   * no arrays       -> child tables or JSON strings
+//
+// Secrets (ESPN SWID / espn_s2 / API keys) are NEVER stored here. Only a
+// *reference* to the environment variable that holds them (ProviderCredentialRef).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Single local user. Multi-user is possible later; MVP assumes one owner.
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  name      String
+  timezone  String   @default("America/Denver")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leagues League[]
+}
+
+/// A fantasy league. Scoring + roster rules live here and are INDEPENDENT per league.
+model League {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name               String
+  season             Int
+  /// "ESPN" | "MANUAL"
+  provider           String    @default("ESPN")
+  /// ESPN leagueId. Nullable until the user configures it.
+  providerLeagueId   String?
+  /// Null = unknown (Team 2's league size is genuinely unknown until sync).
+  size               Int?
+  /// "H2H_POINTS" | "H2H_CATEGORY" | "ROTO" | "BEST_BALL"
+  format             String    @default("H2H_POINTS")
+  /// Points per reception. 0.5 for both of this user's leagues.
+  ppr                Float     @default(0.5)
+  /// Name of the env var pair to use, e.g. "ESPN_LEAGUE_1". Never the value.
+  credentialRefKey   String?
+  /// Regular season length / playoff start, discovered from ESPN when synced.
+  regularSeasonWeeks Int?
+  playoffStartWeek   Int?
+  /// True when the row has never been overwritten by a successful sync.
+  isSeeded           Boolean   @default(true)
+  lastSyncAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  teams          FantasyTeam[]
+  scoringRules   LeagueScoringRule[]
+  rosterSlots    RosterSlotConfig[]
+  matchups       Matchup[]
+  freeAgents     FreeAgentSnapshot[]
+  transactions   Transaction[]
+  waiverTargets  WaiverTarget[]
+  actions        Action[]
+  tradeAnalyses  TradeAnalysis[]
+  projections    Projection[]
+  credentialRefs ProviderCredentialRef[]
+
+  @@index([userId])
+}
+
+/// One scoring rule. Deliberately granular so two leagues can never share a rule row.
+model LeagueScoringRule {
+  id       String @id @default(cuid())
+  leagueId String
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  /// Canonical stat key — see src/lib/scoring/stats.ts (e.g. "recYards", "sacks").
+  statKey        String
+  /// "PER_UNIT" | "BONUS" | "TIER"
+  kind           String   @default("PER_UNIT")
+  /// Points per unit (PER_UNIT) or flat award (BONUS / TIER).
+  points         Float
+  /// Inclusive range for BONUS/TIER rules (min..max, max null = open ended).
+  rangeMin       Float?
+  rangeMax       Float?
+  /// Bonuses sharing a group are mutually exclusive — only the best one applies.
+  exclusiveGroup String?
+  /// "OFFENSE" | "KICKING" | "DST"
+  category       String   @default("OFFENSE")
+  /// "SEED" | "ESPN" | "MANUAL"
+  source         String   @default("SEED")
+  updatedAt      DateTime @updatedAt
+
+  @@unique([leagueId, statKey, kind, rangeMin, rangeMax])
+  @@index([leagueId])
+}
+
+/// Roster construction per league (starters, max at position, bench, IR).
+model RosterSlotConfig {
+  id       String @id @default(cuid())
+  leagueId String
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  /// "QB" | "RB" | "WR" | "TE" | "FLEX" | "DST" | "K" | "BENCH" | "IR"
+  slot                  String
+  starters              Int
+  /// Roster maximum at the position (null for BENCH/IR/FLEX).
+  maxAtPosition         Int?
+  /// Which player positions may fill this slot, JSON string array. e.g. ["RB","WR","TE"]
+  eligiblePositionsJson String
+  /// Display order in lineup views.
+  sortOrder             Int
+  source                String @default("SEED")
+
+  @@unique([leagueId, slot])
+}
+
+model FantasyTeam {
+  id       String @id @default(cuid())
+  leagueId String
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  name           String
+  ownerName      String?
+  providerTeamId String?
+  /// Is this one of MY teams? Opponent teams are stored too (for matchup analysis).
+  isMine         Boolean   @default(false)
+  abbrev         String?
+  wins           Int       @default(0)
+  losses         Int       @default(0)
+  ties           Int       @default(0)
+  pointsFor      Float     @default(0)
+  pointsAgainst  Float     @default(0)
+  standing       Int?
+  logoUrl        String?
+  isSeeded       Boolean   @default(true)
+  lastSyncAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  roster        RosterPlayer[]
+  homeMatchups  Matchup[]       @relation("HomeTeam")
+  awayMatchups  Matchup[]       @relation("AwayTeam")
+  actions       Action[]
+  waiverTargets WaiverTarget[]
+  tradeAnalyses TradeAnalysis[]
+  transactions  Transaction[]
+
+  @@unique([leagueId, providerTeamId])
+  @@index([leagueId])
+}
+
+model NFLTeam {
+  id           String   @id @default(cuid())
+  /// Canonical abbreviation, e.g. "BAL". ESPN/Sleeper variants normalized on import.
+  abbr         String   @unique
+  location     String
+  nickname     String
+  conference   String
+  division     String
+  byeWeek      Int?
+  primaryColor String?
+  updatedAt    DateTime @updatedAt
+
+  players   Player[]
+  homeGames NFLGame[] @relation("HomeNflTeam")
+  awayGames NFLGame[] @relation("AwayNflTeam")
+}
+
+/// Canonical player identity. Provider ids live in PlayerProviderId.
+model Player {
+  id String @id @default(cuid())
+
+  fullName              String
+  firstName             String?
+  lastName              String?
+  /// Lowercase, punctuation/suffix-stripped name used ONLY as a last-resort match key.
+  normalizedName        String
+  /// "QB" | "RB" | "WR" | "TE" | "K" | "DST"
+  position              String
+  /// Extra positions this player is eligible at in ESPN (JSON array of positions).
+  eligiblePositionsJson String    @default("[]")
+  nflTeamId             String?
+  nflTeam               NFLTeam?  @relation(fields: [nflTeamId], references: [id])
+  nflTeamAbbr           String?
+  jersey                String?
+  /// "HEALTHY" | "QUESTIONABLE" | "DOUBTFUL" | "OUT" | "IR" | "PUP" | "SUSPENDED" | "UNKNOWN"
+  injuryStatus          String    @default("UNKNOWN")
+  injuryDetail          String?
+  injuryUpdatedAt       DateTime?
+  /// Depth chart position at his role (1 = starter) when available.
+  depthChartOrder       Int?
+  depthChartRole        String?
+  isDst                 Boolean   @default(false)
+  byeWeek               Int?
+  age                   Int?
+  /// "SEED" | "ESPN" | "SLEEPER" | "MANUAL"
+  source                String    @default("SEED")
+  isManual              Boolean   @default(false)
+  updatedAt             DateTime  @updatedAt
+  createdAt             DateTime  @default(now())
+
+  providerIds   PlayerProviderId[]
+  rosterSpots   RosterPlayer[]
+  projections   Projection[]
+  stats         PlayerStatistic[]
+  news          PlayerNews[]
+  injuries      InjuryReport[]
+  freeAgentRows FreeAgentSnapshot[]
+  waiverTargets WaiverTarget[]      @relation("WaiverAdd")
+  dropTargets   WaiverTarget[]      @relation("WaiverDrop")
+  actions       Action[]
+  transactions  Transaction[]
+
+  @@index([normalizedName])
+  @@index([position])
+}
+
+model PlayerProviderId {
+  id         String @id @default(cuid())
+  playerId   String
+  player     Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  /// "ESPN" | "SLEEPER" | "CSV" | "MANUAL"
+  provider   String
+  providerId String
+
+  @@unique([provider, providerId])
+  @@index([playerId])
+}
+
+/// A player sitting in a slot on one of my fantasy teams.
+model RosterPlayer {
+  id       String      @id @default(cuid())
+  teamId   String
+  team     FantasyTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId String
+  player   Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  /// "QB"|"RB"|"WR"|"TE"|"FLEX"|"DST"|"K"|"BENCH"|"IR"
+  slot            String
+  /// Position-in-slot index so two RB starters keep a stable order.
+  slotIndex       Int       @default(0)
+  /// "DRAFT" | "WAIVER" | "FREE_AGENT" | "TRADE" | "SEED"
+  acquisitionType String    @default("SEED")
+  acquiredAt      DateTime?
+  isManual        Boolean   @default(false)
+  source          String    @default("SEED")
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([teamId, playerId])
+  @@index([teamId])
+}
+
+model NFLGame {
+  id              String   @id @default(cuid())
+  /// Provider game id when available (used for idempotent upserts).
+  providerGameId  String?  @unique
+  season          Int
+  week            Int
+  /// "REGULAR" | "POST" | "PRE"
+  seasonType      String   @default("REGULAR")
+  homeTeamId      String
+  homeTeam        NFLTeam  @relation("HomeNflTeam", fields: [homeTeamId], references: [id])
+  awayTeamId      String
+  awayTeam        NFLTeam  @relation("AwayNflTeam", fields: [awayTeamId], references: [id])
+  kickoff         DateTime
+  /// "SCHEDULED" | "IN_PROGRESS" | "FINAL" | "POSTPONED" | "CANCELED"
+  status          String   @default("SCHEDULED")
+  homeScore       Int?
+  awayScore       Int?
+  /// Vegas inputs used by the D/ST + game-script models. Optional.
+  spread          Float?
+  overUnder       Float?
+  homeImplied     Float?
+  awayImplied     Float?
+  venue           String?
+  isDome          Boolean  @default(false)
+  isInternational Boolean  @default(false)
+  weatherJson     String?
+  source          String   @default("SEED")
+  updatedAt       DateTime @updatedAt
+
+  @@index([season, week])
+  @@index([kickoff])
+}
+
+model Matchup {
+  id            String      @id @default(cuid())
+  leagueId      String
+  league        League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  season        Int
+  week          Int
+  homeTeamId    String
+  homeTeam      FantasyTeam @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Cascade)
+  awayTeamId    String
+  awayTeam      FantasyTeam @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Cascade)
+  homeScore     Float       @default(0)
+  awayScore     Float       @default(0)
+  homeProjected Float?
+  awayProjected Float?
+  isPlayoff     Boolean     @default(false)
+  source        String      @default("SEED")
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([leagueId, season, week, homeTeamId])
+  @@index([leagueId, week])
+}
+
+/// A projection is stored as a STAT LINE, not as points, so each league's scoring
+/// engine can price it independently. `points` is a provider-supplied total kept
+/// for comparison/debugging only.
+model Projection {
+  id                  String   @id @default(cuid())
+  playerId            String
+  player              Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  /// Null = provider projection is league-agnostic (the usual case).
+  leagueId            String?
+  league              League?  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  /// leagueId, or "GLOBAL". Part of the unique key on purpose: SQL treats NULLs
+  /// as distinct, so a nullable column inside a unique index would silently
+  /// allow duplicate rows and break upserts.
+  leagueScope         String   @default("GLOBAL")
+  season              Int
+  /// 0 = rest-of-season (per-game) projection; 1..18 = that specific week.
+  week                Int
+  /// "ESPN" | "SLEEPER" | "CSV" | "BASELINE" | "CONSENSUS" | "MANUAL"
+  source              String
+  statLineJson        String
+  /// Provider's own point total, if they gave one.
+  providerPoints      Float?
+  /// Modeled floor/ceiling stat lines (nullable when the source has no distribution).
+  floorStatLineJson   String?
+  ceilingStatLineJson String?
+  /// 0..1 — how much the model trusts this projection.
+  confidence          Float    @default(0.5)
+  updatedAt           DateTime @updatedAt
+  createdAt           DateTime @default(now())
+
+  @@unique([playerId, season, week, source, leagueScope])
+  @@index([season, week])
+}
+
+model PlayerStatistic {
+  id             String   @id @default(cuid())
+  playerId       String
+  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season         Int
+  week           Int
+  statLineJson   String
+  /// Usage metrics that drive the opportunity model.
+  snapShare      Float?
+  targets        Int?
+  carries        Int?
+  routes         Int?
+  redZoneTouches Int?
+  source         String   @default("SEED")
+  updatedAt      DateTime @updatedAt
+
+  @@unique([playerId, season, week, source])
+  @@index([playerId])
+}
+
+model PlayerNews {
+  id             String   @id @default(cuid())
+  playerId       String?
+  player         Player?  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  headline       String
+  body           String?
+  source         String
+  url            String?
+  publishedAt    DateTime
+  /// 0..100 — how much this changes one of MY decisions (not generic newsworthiness).
+  impactScore    Float    @default(0)
+  /// "INJURY" | "DEPTH_CHART" | "TRANSACTION" | "PRACTICE" | "GAME_STATUS" | "GENERAL"
+  category       String   @default("GENERAL")
+  /// The derived "so what" — what changed for my lineup.
+  interpretation String?
+  createdAt      DateTime @default(now())
+
+  @@index([publishedAt])
+  @@index([playerId])
+}
+
+/// Append-only injury history so we can detect *changes* (the thing that matters).
+model InjuryReport {
+  id             String   @id @default(cuid())
+  playerId       String
+  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  status         String
+  detail         String?
+  /// "DNP" | "LIMITED" | "FULL" | null
+  practiceStatus String?
+  reportedAt     DateTime
+  source         String
+  createdAt      DateTime @default(now())
+
+  @@index([playerId, reportedAt])
+}
+
+/// Availability of a player in a specific league at a point in time.
+model FreeAgentSnapshot {
+  id             String    @id @default(cuid())
+  leagueId       String
+  league         League    @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  playerId       String
+  player         Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  /// "FREE_AGENT" | "WAIVERS" | "ROSTERED"
+  availability   String    @default("FREE_AGENT")
+  percentOwned   Float?
+  percentStarted Float?
+  trendingAdds   Int?
+  waiverClearsAt DateTime?
+  capturedAt     DateTime  @default(now())
+  source         String    @default("SEED")
+
+  @@unique([leagueId, playerId])
+  @@index([leagueId, availability])
+}
+
+model Transaction {
+  id                    String       @id @default(cuid())
+  leagueId              String
+  league                League       @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  teamId                String?
+  team                  FantasyTeam? @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  playerId              String?
+  player                Player?      @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  /// "ADD" | "DROP" | "TRADE" | "LINEUP" | "WAIVER_CLAIM"
+  type                  String
+  week                  Int?
+  bid                   Float?
+  processedAt           DateTime
+  detail                String?
+  providerTransactionId String?      @unique
+  source                String       @default("ESPN")
+
+  @@index([leagueId, processedAt])
+}
+
+/// The unit the whole product is sorted around: "what do I need to do right now".
+model Action {
+  id       String @id @default(cuid())
+  /// "LINEUP" | "WAIVER" | "INJURY" | "TRADE" | "STREAMER" | "ROSTER" | "NEWS"
+  type     String
+  /// "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+  severity String
+  /// "OPEN" | "SNOOZED" | "DONE" | "EXPIRED"
+  status   String @default("OPEN")
+
+  leagueId String?
+  league   League?      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  teamId   String?
+  team     FantasyTeam? @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId String?
+  player   Player?      @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  headline       String
+  recommendation String
+  reason         String
+  /// 0..1
+  confidence     Float     @default(0.5)
+  /// When this must be acted on (usually a kickoff or waiver processing time).
+  deadline       DateTime?
+  snoozedUntil   DateTime?
+  /// Which engine produced it, e.g. "engine:lineup".
+  source         String
+  /// Stable key so re-running the engine updates instead of duplicating.
+  dedupeKey      String    @unique
+  /// Structured detail for the UI (fallback plans, swap pairs, etc.)
+  payloadJson    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, severity])
+  @@index([leagueId, status])
+}
+
+model WaiverTarget {
+  id           String      @id @default(cuid())
+  leagueId     String
+  league       League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  teamId       String
+  team         FantasyTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId     String
+  player       Player      @relation("WaiverAdd", fields: [playerId], references: [id], onDelete: Cascade)
+  dropPlayerId String?
+  dropPlayer   Player?     @relation("WaiverDrop", fields: [dropPlayerId], references: [id], onDelete: SetNull)
+
+  /// "HIGH" | "MEDIUM" | "LOW" | "SPECULATIVE"
+  priority       String
+  score          Float
+  shortTermValue Float
+  rosValue       Float
+  reason         String
+  /// JSON array of evidence strings (snap share, targets, injury ahead, ...).
+  evidenceJson   String   @default("[]")
+  week           Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([leagueId, playerId, week])
+  @@index([leagueId, score])
+}
+
+model TradeAnalysis {
+  id          String      @id @default(cuid())
+  leagueId    String
+  league      League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  teamId      String
+  team        FantasyTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  /// JSON arrays of playerIds
+  giveJson    String
+  getJson     String
+  /// "ACCEPT" | "LEAN_ACCEPT" | "EVEN" | "LEAN_DECLINE" | "DECLINE"
+  verdict     String
+  /// Weekly starting-lineup points gained/lost (the WAR-style number).
+  lineupDelta Float
+  rosDelta    Float
+  depthDelta  Float
+  explanation String
+  detailJson  String?
+  createdAt   DateTime    @default(now())
+
+  @@index([leagueId, createdAt])
+}
+
+/// One row per data-refresh attempt; powers "updated X minutes ago" + stale warnings.
+model DataSync {
+  id                String    @id @default(cuid())
+  /// "ESPN_LEAGUE" | "NFL_PLAYERS" | "NFL_SCHEDULE" | "INJURIES" | "PROJECTIONS" | "NEWS" | "FREE_AGENTS" | "STATS" | "ENGINE"
+  scope             String
+  /// Provider that served it, e.g. "ESPN" | "SLEEPER" | "BASELINE" | "MOCK".
+  provider          String
+  /// Optional scope key (leagueId) so per-league freshness is tracked separately.
+  scopeKey          String?
+  /// "OK" | "PARTIAL" | "FAILED" | "RUNNING"
+  status            String
+  startedAt         DateTime  @default(now())
+  finishedAt        DateTime?
+  itemCount         Int       @default(0)
+  message           String?
+  /// Minutes after which this scope is considered stale.
+  staleAfterMinutes Int       @default(180)
+
+  @@index([scope, startedAt])
+}
+
+/// Points at the ENV VAR that holds a secret. The secret itself never lands here.
+model ProviderCredentialRef {
+  id            String   @id @default(cuid())
+  leagueId      String?
+  league        League?  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  provider      String
+  /// e.g. { "swid": "ESPN_SWID", "s2": "ESPN_S2", "leagueId": "ESPN_LEAGUE_1_ID" }
+  envVarMapJson String
+  note          String?
+  updatedAt     DateTime @updatedAt
+
+  @@unique([provider, leagueId])
+}
+
+/// Simple key/value app settings (timezone, lock warning minutes, notification prefs).
+model AppSetting {
+  key       String   @id
+  valueJson String
+  updatedAt DateTime @updatedAt
+}
+
+/// In-app notification feed (MVP channel). Push/email/SMS adapters plug in later.
+model Notification {
+  id        String    @id @default(cuid())
+  /// "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+  severity  String
+  title     String
+  body      String
+  /// Deep link into the app, e.g. "/team/abc".
+  href      String?
+  actionId  String?
+  /// "IN_APP" | "PUSH" | "EMAIL" | "SMS"
+  channel   String    @default("IN_APP")
+  readAt    DateTime?
+  /// Stable key to avoid re-notifying about the same fact.
+  dedupeKey String    @unique
+  createdAt DateTime  @default(now())
+
+  @@index([readAt, createdAt])
+}

@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark "command center" palette. Deliberately low-chroma so the priority
+       colors below are the only saturated things on screen. */
+    --background: 225 24% 7%;
+    --foreground: 220 20% 96%;
+    --card: 225 22% 10%;
+    --card-foreground: 220 20% 96%;
+    --muted: 225 16% 16%;
+    --muted-foreground: 220 12% 64%;
+    --accent: 225 18% 18%;
+    --accent-foreground: 220 20% 96%;
+    --primary: 190 95% 52%;
+    --primary-foreground: 225 40% 8%;
+    --secondary: 225 16% 18%;
+    --secondary-foreground: 220 20% 96%;
+    --border: 225 16% 20%;
+    --input: 225 16% 20%;
+    --ring: 190 95% 52%;
+
+    /* Priority states: CRITICAL / ACTION NEEDED / WATCH / GOOD */
+    --critical: 352 88% 58%;
+    --critical-foreground: 0 0% 100%;
+    --action: 28 96% 56%;
+    --action-foreground: 20 40% 8%;
+    --watch: 45 96% 58%;
+    --watch-foreground: 45 60% 10%;
+    --good: 152 62% 46%;
+    --good-foreground: 152 60% 8%;
+
+    --radius: 0.85rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    /* Safe area for iOS home indicator above the bottom nav. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Numbers should line up in tables and score columns. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-[var(--radius)] border border-border bg-card;
+  }
+  .hairline {
+    @apply border-b border-border/60;
+  }
+}
+
+/* Respect a user's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
