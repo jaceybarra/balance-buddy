@@ -82,22 +82,23 @@ so on every card.
 
 ### League and team ids
 
-1. Open <https://fantasy.espn.com> on a desktop browser and go to your team.
-2. Read them straight out of the URL:
+**Already filled in** in `.env.example`, taken from the league URLs:
 
 ```
-https://fantasy.espn.com/football/team?leagueId=123456789&teamId=4
-                                                ^^^^^^^^^        ^
-                                                league id     team id
+ESPN_LEAGUE_1_ID=423473861     # Gibbs Me The Trophy
+ESPN_TEAM_1_ID=12
+ESPN_LEAGUE_2_ID=81193741      # So Good It Hurts
+ESPN_TEAM_2_ID=7
+SEASON=2026
 ```
 
-Put those in `.env.local`:
+If you need to find them again — or the ids change next season — open your team
+on <https://fantasy.espn.com> and read them out of the address bar:
 
 ```
-ESPN_LEAGUE_1_ID=123456789     # Gibbs Me The Trophy
-ESPN_TEAM_1_ID=4
-ESPN_LEAGUE_2_ID=987654321     # So Good It Hurts
-ESPN_TEAM_2_ID=2
+https://fantasy.espn.com/football/team?leagueId=423473861&seasonId=2026&teamId=12
+                                                ^^^^^^^^^                      ^^
+                                                league id                 team id
 ```
 
 ### Cookies (private leagues only)
@@ -126,8 +127,14 @@ ESPN_LEAGUE_2_SWID=...
 ESPN_LEAGUE_2_S2=...
 ```
 
-Then hit **Refresh** in the app header. Settings → *Synchronization status* shows
-exactly which variables are set (never their values) and what each sync did.
+Then go to **Settings → Test ESPN connection**. It is read-only and tells you
+exactly what happened: whether each league was reachable, whether your team id
+matched (and lists the league's teams if it didn't), how many scoring rules were
+imported, which ESPN `statId`s could not be mapped, and every difference between
+ESPN's settings and the ones currently stored.
+
+Once that comes back green, hit **Refresh** in the app header to make the synced
+ESPN data authoritative.
 
 > ESPN cookies expire every few weeks. When they do, the app keeps working on the
 > last synced data, marks it stale, and the sync status names the variable to

@@ -52,10 +52,18 @@ export async function espnFetch<T>(
   try {
     const res = await fetch(url.toString(), { headers, signal: controller.signal, cache: 'no-store' });
     if (res.status === 401 || res.status === 403) {
+      // Distinguish "you never gave us credentials" from "the ones you gave
+      // were refused" — they need different fixes, and guessing wrong sends
+      // people hunting for a cookie problem they do not have.
+      const hadCookies = Boolean(cfg.swid && cfg.s2);
       throw new EspnError(
-        'ESPN rejected the request (private league or expired cookies)',
+        hadCookies
+          ? 'ESPN rejected your credentials'
+          : 'ESPN refused the request and no credentials were sent',
         res.status,
-        `Refresh ${cfg.envVarMap.swid} and ${cfg.envVarMap.s2} — ESPN cookies expire every few weeks.`,
+        hadCookies
+          ? `Your cookies were refused. Sign in to fantasy.espn.com again and re-copy ${cfg.envVarMap.swid} and ${cfg.envVarMap.s2} — they expire every few weeks. (A proxy or VPN between you and ESPN can also return ${res.status}.)`
+          : `This league is private, so it needs cookies. Set ${cfg.envVarMap.swid} and ${cfg.envVarMap.s2}, then restart. See README "Cookies (private leagues only)".`,
       );
     }
     if (res.status === 404) {

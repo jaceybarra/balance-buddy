@@ -118,6 +118,7 @@ async function main() {
     name: 'Gibbs Me The Trophy',
     size: 12,
     credentialRefKey: 'league1',
+    providerLeagueId: process.env.ESPN_LEAGUE_1_ID ?? null,
     slotConfig: SLOT_CONFIG_GIBBS,
     rules: GIBBS_SCORING_RULES,
     envVarMap: { leagueId: 'ESPN_LEAGUE_1_ID', teamId: 'ESPN_TEAM_1_ID', swid: 'ESPN_LEAGUE_1_SWID or ESPN_SWID', s2: 'ESPN_LEAGUE_1_S2 or ESPN_S2' },
@@ -129,6 +130,7 @@ async function main() {
     name: 'So Good It Hurts',
     size: null,
     credentialRefKey: 'league2',
+    providerLeagueId: process.env.ESPN_LEAGUE_2_ID ?? null,
     slotConfig: SLOT_CONFIG_SGIH,
     rules: SGIH_SCORING_RULES,
     envVarMap: { leagueId: 'ESPN_LEAGUE_2_ID', teamId: 'ESPN_TEAM_2_ID', swid: 'ESPN_LEAGUE_2_SWID or ESPN_SWID', s2: 'ESPN_LEAGUE_2_S2 or ESPN_S2' },
@@ -368,6 +370,7 @@ async function createLeague(args: {
   name: string;
   size: number | null;
   credentialRefKey: string;
+  providerLeagueId?: string | null;
   slotConfig: typeof SLOT_CONFIG_GIBBS;
   rules: ScoringRule[];
   envVarMap: Record<string, string>;
@@ -382,6 +385,7 @@ async function createLeague(args: {
       format: 'H2H_POINTS',
       ppr: 0.5,
       credentialRefKey: args.credentialRefKey,
+      providerLeagueId: args.providerLeagueId ?? null,
       isSeeded: true,
     },
   });

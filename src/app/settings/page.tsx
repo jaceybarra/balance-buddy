@@ -8,6 +8,7 @@ import { describeRule } from '@/lib/scoring/engine';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CsvUpload } from '@/components/csv-upload';
+import { EspnDiagnose } from '@/components/espn-diagnose';
 import { ManualPlayerEditor } from '@/components/manual-player-editor';
 import { RefreshButton } from '@/components/refresh-button';
 import { LeagueSettingsForm } from '@/components/league-settings-form';
@@ -72,6 +73,7 @@ export default async function SettingsPage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">ESPN connection</h2>
+        <EspnDiagnose />
         {espnStatuses.map((status, idx) => (
           <Card key={status.key} className="p-4">
             <div className="flex items-center justify-between gap-2">
