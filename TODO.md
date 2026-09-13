@@ -113,18 +113,22 @@ These are real, and none of them block daily use:
    an honest per-scope status. What remains unconfirmed is the happy path —
    especially a few ESPN `statId` mappings, which Settings will list for manual
    confirmation on your first real sync. *(Add the env vars and hit Refresh.)*
-2. **So Good It Hurts still runs on the internal model.** Only the Gibbs Me The
-   Trophy roster has real ESPN projections seeded (transcribed from the roster
-   page on 2026-09-12). Every number on the other team is the app's own estimate
-   and is labeled "est." in the UI. Syncing ESPN — or sending a screenshot of
-   that roster — fixes it.
+2. **Both rosters now carry real ESPN projections**, transcribed from the ESPN
+   roster pages on 2026-09-13, along with the real Week 1 matchups and kickoff
+   times for all thirteen games involving rostered players. Free agents are
+   still modeled, so any free-agent-versus-starter comparison is labeled and
+   demoted. An ESPN sync replaces all of it with live data.
 3. **The internal model is a fallback, not a projection source.** It exists so
    the app works before any provider is connected. It must never be presented
    as, or blended into, real data: the consensus drops it whenever a real source
    exists, recommendations built on it are capped at 60% confidence, and
    estimate-versus-real comparisons are demoted and labeled. This was learned the
    hard way — an early build recommended starting Jayden Reed over Christian
-   Watson off invented numbers, while ESPN projected the opposite.
+   Watson off invented numbers, while ESPN projected the opposite. A second
+   instance of the same class: the app applied its own "questionable" discount
+   on top of ESPN's projection, which already prices playing status in (ESPN
+   projects a ruled-out player at 0.0). That double-count alone would have
+   benched Malik Nabers for a worse player.
 4. **Opponent scores are estimated** until an ESPN sync provides their rosters. The
    UI labels them as estimates.
 5. **No live weather source.** The model has the hook; nothing feeds it yet.

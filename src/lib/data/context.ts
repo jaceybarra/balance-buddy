@@ -298,6 +298,7 @@ export async function buildPlayerCards(
             source: weekRow?.source ?? 'UNKNOWN',
             updatedAt: weekRow?.updatedAt ?? null,
             providerPoints: weekRow?.providerPoints ?? null,
+            providerAdjustsForInjury: weekRow ? isRealSource(weekRow.source) : false,
           })
         : null;
 
@@ -314,6 +315,7 @@ export async function buildPlayerCards(
           source: rosRow.source,
           // A provider's rest-of-season number arrives as points, not a stat line.
           providerPoints: rosRow.providerPoints,
+          providerAdjustsForInjury: isRealSource(rosRow.source),
         }).points
       : null;
 

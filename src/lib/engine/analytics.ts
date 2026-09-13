@@ -38,8 +38,9 @@ export function buildRosterMetrics(ctx: LeagueContext): RosterMetric[] {
     .slice(0, 4)
     .reduce((s, v) => s + v, 0);
 
-  const floor = optimal.assignments.reduce((sum, a) => sum + (a.player?.projection?.floor ?? 0) * (a.player?.projection?.playProbability ?? 1), 0);
-  const ceiling = optimal.assignments.reduce((sum, a) => sum + (a.player?.projection?.ceiling ?? 0) * (a.player?.projection?.playProbability ?? 1), 0);
+  // injuryFactor, not playProbability — the projection may already price the injury in.
+  const floor = optimal.assignments.reduce((sum, a) => sum + (a.player?.projection?.floor ?? 0) * (a.player?.projection?.injuryFactor ?? 1), 0);
+  const ceiling = optimal.assignments.reduce((sum, a) => sum + (a.player?.projection?.ceiling ?? 0) * (a.player?.projection?.injuryFactor ?? 1), 0);
 
   const efficiency = optimal.optimalProjected > 0 ? ctx.starters.reduce((s, p) => s + (p.projection?.expected ?? 0), 0) / optimal.optimalProjected : 1;
 

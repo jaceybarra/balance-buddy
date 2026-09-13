@@ -16,6 +16,12 @@ export interface ContingencyStep {
 export interface ContingencyPlan {
   player: PlayerCard;
   status: string;
+  /**
+   * Set when the best replacement kicks off BEFORE the questionable player.
+   * That inverts the usual advice: you cannot wait for news, because the
+   * replacement locks first.
+   */
+  earlyDecision: { replacement: string; lockAt: Date; because: string } | null;
   /** Decision deadline — his kickoff, minus a safety margin. */
   deadline: Date | null;
   deadlineLabel: string;
@@ -80,6 +86,25 @@ export function buildContingencyPlan(ctx: LeagueContext, player: PlayerCard, now
     .sort((a, b) => (b.projection?.expected ?? 0) - (a.projection?.expected ?? 0));
   const lateOption = laterOptions[0] ?? null;
 
+  // The strongest replacement overall, regardless of kickoff order.
+  const bestReplacement = ctx.bench
+    .filter((b) => !NON_PLAYING_STATUSES.includes(b.injuryStatus) && !b.onBye)
+    .filter(eligibleForSlot)
+    .sort((a, b) => (b.projection?.expected ?? 0) - (a.projection?.expected ?? 0))[0] ?? null;
+
+  // If that replacement plays earlier, the real deadline is HIS kickoff, not
+  // the questionable player's — a distinction that decides the week.
+  const earlyDecision =
+    bestReplacement?.game && kickoff && bestReplacement.game.kickoff.getTime() < kickoff.getTime()
+      ? {
+          replacement: bestReplacement.name,
+          lockAt: bestReplacement.game.kickoff,
+          because: `${bestReplacement.name} kicks off at ${gameTimeLabel(bestReplacement.game.kickoff)}, ${
+            player.name
+          } not until ${gameTimeLabel(kickoff)}. If you want ${bestReplacement.name} in, you must decide before his game — you cannot wait for ${player.name}'s status.`,
+        }
+      : null;
+
   const steps: ContingencyStep[] = [
     {
       label: 'Plan A',
@@ -113,8 +138,15 @@ export function buildContingencyPlan(ctx: LeagueContext, player: PlayerCard, now
   return {
     player,
     status: player.injuryStatus,
-    deadline,
-    deadlineLabel: deadline ? gameTimeLabel(deadline) : 'no scheduled game',
+    earlyDecision,
+    // The real deadline is whichever comes first: his kickoff, or the kickoff
+    // of the replacement you would need to swap in.
+    deadline: earlyDecision ? new Date(Math.min(deadline?.getTime() ?? Infinity, earlyDecision.lockAt.getTime() - DECISION_MARGIN_MINUTES * 60_000)) : deadline,
+    deadlineLabel: earlyDecision
+      ? gameTimeLabel(new Date(earlyDecision.lockAt.getTime() - DECISION_MARGIN_MINUTES * 60_000))
+      : deadline
+        ? gameTimeLabel(deadline)
+        : 'no scheduled game',
     minutesRemaining: deadline ? minutesUntil(deadline, now) : null,
     steps,
     hasLateWindowFallback: Boolean(lateOption),

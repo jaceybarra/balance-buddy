@@ -21,14 +21,14 @@ export interface SeedPlayer {
 }
 
 /**
- * SEED SNAPSHOT: 2026-09-11
+ * SEED SNAPSHOT: 2026-09-13
  *
  * Transcribed from the user's ESPN screenshots. NFL team assignments, injury
  * designations and depth-chart roles are a point-in-time snapshot and are
  * expected to be replaced by provider data — every row is written with
  * source = "SEED" so the UI can show what has not yet been verified.
  */
-export const SEED_SNAPSHOT_LABEL = '2026-09-11';
+export const SEED_SNAPSHOT_LABEL = '2026-09-13';
 
 /** Team 1 — Gibbs Me The Trophy. */
 export const GIBBS_ROSTER: { slot: string; slotIndex: number; player: SeedPlayer }[] = [
@@ -47,7 +47,7 @@ export const GIBBS_ROSTER: { slot: string; slotIndex: number; player: SeedPlayer
   { slot: 'BENCH', slotIndex: 3, player: { name: 'Jordan Mason', position: 'RB', team: 'MIN', archetype: 'RB2', usageMod: 0.98, depthChartOrder: 2, depthChartRole: 'Early-down back' } },
   // One bench slot intentionally left empty — matches the screenshot and gives
   // the roster engine an open spot to recommend an add into.
-  { slot: 'IR', slotIndex: 0, player: { name: 'Brock Bowers', position: 'TE', team: 'LV', archetype: 'TE_ELITE', injuryStatus: 'OUT', injuryDetail: 'Listed OUT on the 2026-09-11 snapshot; occupying the IR slot.', usageMod: 1.0, depthChartOrder: 1, depthChartRole: 'TE1' } },
+  { slot: 'IR', slotIndex: 0, player: { name: 'Brock Bowers', position: 'TE', team: 'LV', archetype: 'TE_ELITE', injuryStatus: 'OUT', injuryDetail: 'Listed OUT on the ESPN roster page (2026-09-13); occupying the IR slot and projected 0.0.', usageMod: 1.0, depthChartOrder: 1, depthChartRole: 'TE1' } },
 ];
 
 /** Team 2 — So Good It Hurts. */
@@ -56,7 +56,7 @@ export const SGIH_ROSTER: { slot: string; slotIndex: number; player: SeedPlayer 
   { slot: 'RB', slotIndex: 0, player: { name: 'Jonathan Taylor', position: 'RB', team: 'IND', archetype: 'RB_ELITE', usageMod: 1.0, depthChartOrder: 1, depthChartRole: 'Lead back' } },
   { slot: 'RB', slotIndex: 1, player: { name: 'Bucky Irving', position: 'RB', team: 'TB', archetype: 'RB1', usageMod: 1.02, depthChartOrder: 1, depthChartRole: 'Lead back' } },
   { slot: 'WR', slotIndex: 0, player: { name: 'Drake London', position: 'WR', team: 'ATL', archetype: 'WR_ELITE', usageMod: 1.0, depthChartOrder: 1, depthChartRole: 'X receiver' } },
-  { slot: 'WR', slotIndex: 1, player: { name: 'Malik Nabers', position: 'WR', team: 'NYG', archetype: 'WR_ELITE', usageMod: 1.02, injuryStatus: 'QUESTIONABLE', injuryDetail: 'Questionable on the 2026-09-11 snapshot. Status must be confirmed before kickoff.', depthChartOrder: 1, depthChartRole: 'Alpha target' } },
+  { slot: 'WR', slotIndex: 1, player: { name: 'Malik Nabers', position: 'WR', team: 'NYG', archetype: 'WR_ELITE', usageMod: 1.02, injuryStatus: 'QUESTIONABLE', injuryDetail: 'Listed Q on the ESPN roster page (2026-09-13). He plays Sunday night, so his status resolves late.', depthChartOrder: 1, depthChartRole: 'Alpha target' } },
   { slot: 'TE', slotIndex: 0, player: { name: 'Kyle Pitts Sr.', position: 'TE', team: 'ATL', archetype: 'TE1', usageMod: 0.97, depthChartOrder: 1, depthChartRole: 'TE1' } },
   { slot: 'FLEX', slotIndex: 0, player: { name: 'Davante Adams', position: 'WR', team: 'LAR', archetype: 'WR1', usageMod: 0.98, depthChartOrder: 1, depthChartRole: 'X receiver' } },
   { slot: 'FLEX', slotIndex: 1, player: { name: 'Terry McLaurin', position: 'WR', team: 'WSH', archetype: 'WR1', usageMod: 0.97, depthChartOrder: 1, depthChartRole: 'X receiver' } },
@@ -65,7 +65,7 @@ export const SGIH_ROSTER: { slot: string; slotIndex: number; player: SeedPlayer 
   { slot: 'BENCH', slotIndex: 0, player: { name: 'Tony Pollard', position: 'RB', team: 'TEN', archetype: 'RB1', usageMod: 0.96, depthChartOrder: 1, depthChartRole: 'Lead back' } },
   { slot: 'BENCH', slotIndex: 1, player: { name: 'Jordan Addison', position: 'WR', team: 'MIN', archetype: 'WR2', usageMod: 1.03, depthChartOrder: 2, depthChartRole: 'Z receiver' } },
   { slot: 'BENCH', slotIndex: 2, player: { name: 'Aaron Jones Sr.', position: 'RB', team: 'MIN', archetype: 'RB2', usageMod: 1.0, depthChartOrder: 1, depthChartRole: 'Committee back' } },
-  { slot: 'BENCH', slotIndex: 3, player: { name: 'Rachaad White', position: 'RB', team: 'TB', archetype: 'RB3', usageMod: 1.0, depthChartOrder: 2, depthChartRole: 'Passing-down back', handcuffFor: 'Bucky Irving' } },
+  { slot: 'BENCH', slotIndex: 3, player: { name: 'Rachaad White', position: 'RB', team: 'WSH', archetype: 'RB3', usageMod: 1.0, depthChartOrder: 2, depthChartRole: 'Passing-down back' } },
   { slot: 'BENCH', slotIndex: 4, player: { name: 'Matthew Stafford', position: 'QB', team: 'LAR', archetype: 'QB1', usageMod: 0.98, depthChartOrder: 1, depthChartRole: 'QB1' } },
   { slot: 'BENCH', slotIndex: 5, player: { name: 'Calvin Ridley', position: 'WR', team: 'TEN', archetype: 'WR2', usageMod: 1.0, depthChartOrder: 1, depthChartRole: 'X receiver' } },
   { slot: 'BENCH', slotIndex: 6, player: { name: 'Rashod Bateman', position: 'WR', team: 'BAL', archetype: 'WR3', usageMod: 0.98, depthChartOrder: 2, depthChartRole: 'Z receiver' } },
@@ -75,12 +75,11 @@ export const SGIH_ROSTER: { slot: string; slotIndex: number; player: SeedPlayer 
     player: {
       name: 'Jonah Coleman',
       position: 'RB',
-      team: null, // Seed does not know his NFL team — intentionally unresolved.
+      team: 'DEN',
       archetype: 'RB_HANDCUFF',
       usageMod: 0.9,
       depthChartOrder: 3,
       depthChartRole: 'Rotational back',
-      note: 'NFL team unresolved in the seed snapshot. Sync ESPN/Sleeper to fill it in.',
     },
   },
 ];

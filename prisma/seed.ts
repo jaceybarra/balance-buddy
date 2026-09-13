@@ -30,7 +30,12 @@ import {
   type SeedPlayer,
 } from '../src/lib/seed/players';
 import { GIBBS_SCORING_RULES, SGIH_SCORING_RULES } from '../src/lib/scoring/seed-configs';
-import { GIBBS_ESPN_WEEK1_PROJECTIONS, GIBBS_ESPN_WEEK1_ACTUALS } from '../src/lib/seed/week1-2026';
+import {
+  GIBBS_ESPN_WEEK1_PROJECTIONS,
+  GIBBS_ESPN_WEEK1_ACTUALS,
+  SGIH_ESPN_WEEK1_PROJECTIONS,
+  SGIH_ESPN_WEEK1_ACTUALS,
+} from '../src/lib/seed/week1-2026';
 import { identityKey } from '../src/lib/identity/normalize';
 import { PROJECTION_SOURCES, ROS_WEEK, USAGE_BASELINE_WEEK, USAGE_SOURCE, GLOBAL_SCOPE } from '../src/lib/projections/sources';
 import type { ScoringRule } from '../src/lib/scoring/types';
@@ -341,7 +346,8 @@ async function main() {
 
   await backfillOpponentProjections(currentWeek);
 
-  await seedEspnProjections(gibbs.id, currentWeek);
+  await seedEspnProjections(gibbs.id, 'Gibbs Me The Trophy', currentWeek, GIBBS_ESPN_WEEK1_PROJECTIONS, GIBBS_ESPN_WEEK1_ACTUALS);
+  await seedEspnProjections(sgih.id, 'So Good It Hurts', currentWeek, SGIH_ESPN_WEEK1_PROJECTIONS, SGIH_ESPN_WEEK1_ACTUALS);
 
   const { regenerateActions } = await import('../src/lib/engine/actions');
   const actions = await regenerateActions();
@@ -377,9 +383,15 @@ async function main() {
  * model everywhere (see SOURCE_RANK), so what the app shows matches what the
  * user sees in ESPN. A live sync replaces them with current numbers.
  */
-async function seedEspnProjections(leagueId: string, week: number) {
+async function seedEspnProjections(
+  leagueId: string,
+  leagueName: string,
+  week: number,
+  projections: Record<string, number>,
+  actuals: Record<string, number>,
+) {
   let count = 0;
-  for (const [name, points] of Object.entries(GIBBS_ESPN_WEEK1_PROJECTIONS)) {
+  for (const [name, points] of Object.entries(projections)) {
     const key = identityKey(name, name.includes('D/ST') ? 'DST' : 'QB', null);
     const player =
       (await prisma.player.findFirst({ where: { fullName: name } })) ??
@@ -418,7 +430,7 @@ async function seedEspnProjections(leagueId: string, week: number) {
   }
 
   // Record what has actually been scored so far (the Thursday game).
-  for (const [name, points] of Object.entries(GIBBS_ESPN_WEEK1_ACTUALS)) {
+  for (const [name, points] of Object.entries(actuals)) {
     const player = await prisma.player.findFirst({ where: { fullName: name } });
     if (!player) continue;
     await prisma.playerStatistic.upsert({
@@ -435,7 +447,7 @@ async function seedEspnProjections(leagueId: string, week: number) {
     void points;
   }
 
-  console.log(`  ${count} ESPN Week ${week} projections applied to Gibbs Me The Trophy`);
+  console.log(`  ${count} ESPN Week ${week} projections applied to ${leagueName}`);
 }
 
 async function createLeague(args: {

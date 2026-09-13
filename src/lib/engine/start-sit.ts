@@ -72,7 +72,8 @@ function scoreFor(player: PlayerCard, strategy: LineupStrategy): number {
   if (!proj || player.onBye) return -1;
   const weight = strategy === 'BALANCED' ? 0 : 0.3;
   const tilt = strategy === 'CEILING' ? proj.ceiling : proj.floor;
-  return (proj.points * (1 - weight) + tilt * weight) * proj.playProbability;
+  // See playerValue(): never re-apply an injury discount the source already made.
+  return (proj.points * (1 - weight) + tilt * weight) * proj.injuryFactor;
 }
 
 function verdictFor(index: number, gapToBest: number, player: PlayerCard, tooClose: boolean): StartSitVerdict {

@@ -22,6 +22,7 @@ export function rosLineupValue(roster: PlayerCard[], slots: SlotDefinition[]): n
           ceiling: p.rosPerGame * 1.4,
           expected: p.rosPerGame,
           playProbability: 1,
+          injuryFactor: 1,
           confidence: p.projection?.confidence ?? 0.5,
           source: 'ROS',
           updatedAt: p.projection?.updatedAt ?? null,

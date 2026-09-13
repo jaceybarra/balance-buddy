@@ -12,6 +12,12 @@ export interface PricedProjection {
   /** points x probability he actually plays — what the optimizer sorts on. */
   expected: number;
   playProbability: number;
+  /**
+   * The injury discount that was ACTUALLY applied to reach `expected` (1 when
+   * the source already accounted for it). Anything that re-weights a projection
+   * must use this rather than playProbability, or it double-counts the injury.
+   */
+  injuryFactor: number;
   /** 0..1 */
   confidence: number;
   source: string;
@@ -40,6 +46,15 @@ export function priceProjection(args: {
   updatedAt?: Date | null;
   /** Points a provider computed in THEIR scoring. Used only as a last resort. */
   providerPoints?: number | null;
+  /**
+   * True when the source already accounts for whether the player will suit up.
+   *
+   * ESPN does: it projects a ruled-OUT player at 0.0. Applying our own
+   * play-probability discount on top of a number like that double-counts the
+   * injury and invents a gap that is not there — which is exactly how a
+   * questionable starter can get benched for a worse player.
+   */
+  providerAdjustsForInjury?: boolean;
 }): PricedProjection {
   const main = scoreStatLine(args.statLine, args.config);
 
@@ -48,12 +63,14 @@ export function priceProjection(args: {
   // pretending the league's scoring was applied.
   if (main.points === 0 && main.breakdown.length === 0 && args.providerPoints != null) {
     const playProb = PLAY_PROBABILITY[args.injuryStatus] ?? 0.9;
+    const factor = args.providerAdjustsForInjury ? 1 : playProb;
     return {
       points: round2(args.providerPoints),
       floor: round2(args.providerPoints * 0.62),
       ceiling: round2(args.providerPoints * 1.45),
-      expected: round2(args.providerPoints * playProb),
+      expected: round2(args.providerPoints * factor),
       playProbability: playProb,
+      injuryFactor: factor,
       // Lower confidence: these points were not computed in this league's rules.
       confidence: Math.min(args.confidence, 0.45),
       source: `${args.source} (points as provided)`,
@@ -65,13 +82,17 @@ export function priceProjection(args: {
   const floor = args.floorStatLine ? scoreStatLine(args.floorStatLine, args.config).points : round2(main.points * 0.6);
   const ceiling = args.ceilingStatLine ? scoreStatLine(args.ceilingStatLine, args.config).points : round2(main.points * 1.45);
   const playProbability = PLAY_PROBABILITY[args.injuryStatus] ?? 0.9;
+  // The probability is still reported (the contingency planner needs it), but it
+  // is only APPLIED when the source has not already done so.
+  const injuryFactor = args.providerAdjustsForInjury ? 1 : playProbability;
 
   return {
     points: main.points,
     floor: round2(floor),
     ceiling: round2(ceiling),
-    expected: round2(main.points * playProbability),
+    expected: round2(main.points * injuryFactor),
     playProbability,
+    injuryFactor,
     confidence: args.confidence,
     source: args.source,
     updatedAt: args.updatedAt ?? null,

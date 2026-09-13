@@ -48,8 +48,13 @@ export interface LineupResult {
   notes: string[];
 }
 
-/** Points below which two players are treated as effectively tied. */
-export const TIE_THRESHOLD = 0.75;
+/**
+ * Points below which two players are treated as effectively tied.
+ *
+ * Weekly projections carry several points of error, so a sub-point edge is
+ * noise. Reporting it as a decision would be false precision.
+ */
+export const TIE_THRESHOLD = 1.0;
 
 function eligibleFor(slot: SlotDefinition, player: PlayerCard): boolean {
   const positions = [player.position, ...player.eligiblePositions];
@@ -69,7 +74,9 @@ export function playerValue(player: PlayerCard, strategy: LineupStrategy): numbe
   const weight = strategy === 'BALANCED' ? 0 : 0.3;
   const tilt = strategy === 'CEILING' ? proj.ceiling : proj.floor;
   const blended = proj.points * (1 - weight) + tilt * weight;
-  return blended * proj.playProbability;
+  // injuryFactor, not playProbability: the projection source may already have
+  // priced the injury in, and discounting twice benches good players for bad ones.
+  return blended * proj.injuryFactor;
 }
 
 /**

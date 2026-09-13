@@ -133,7 +133,10 @@ export async function generateActionsForLeague(ctx: LeagueContext, now: Date = n
       reason: [
         player.injuryDetail ?? 'Status per the latest injury report',
         planB?.costIfWrong ? `Leaving him in costs about ${planB.costIfWrong} projected points if he is inactive.` : null,
-        plan.hasLateWindowFallback ? 'You have a later-window fallback, so you can wait for news.' : null,
+        plan.earlyDecision ? plan.earlyDecision.because : null,
+        plan.hasLateWindowFallback && !plan.earlyDecision
+          ? 'You have a later-window fallback, so you can wait for news.'
+          : null,
       ]
         .filter(Boolean)
         .join(' '),
@@ -146,6 +149,7 @@ export async function generateActionsForLeague(ctx: LeagueContext, now: Date = n
         steps: plan.steps,
         deadlineLabel: plan.deadlineLabel,
         hasLateWindowFallback: plan.hasLateWindowFallback,
+        earlyDecision: plan.earlyDecision,
       },
     });
   }

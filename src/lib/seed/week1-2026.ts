@@ -17,6 +17,7 @@ export interface KnownGame {
 const THU_NIGHT = new Date(Date.UTC(2026, 8, 11, 0, 15)); // Thu Sep 10, 8:15pm ET
 const SUN_EARLY = new Date(Date.UTC(2026, 8, 13, 17, 0)); // Sun Sep 13, 1:00pm ET
 const SUN_LATE = new Date(Date.UTC(2026, 8, 13, 20, 25)); // Sun Sep 13, 4:25pm ET
+const SUN_NIGHT = new Date(Date.UTC(2026, 8, 14, 0, 20)); // Sun Sep 13, 8:20pm ET
 const MON_NIGHT = new Date(Date.UTC(2026, 8, 15, 0, 15)); // Mon Sep 14, 8:15pm ET
 
 export const WEEK1_KNOWN_GAMES: KnownGame[] = [
@@ -29,10 +30,17 @@ export const WEEK1_KNOWN_GAMES: KnownGame[] = [
   { awayAbbr: 'BUF', homeAbbr: 'HOU', kickoff: SUN_EARLY, status: 'SCHEDULED' },
   { awayAbbr: 'ATL', homeAbbr: 'PIT', kickoff: SUN_EARLY, status: 'SCHEDULED' },
   { awayAbbr: 'BAL', homeAbbr: 'IND', kickoff: SUN_EARLY, status: 'SCHEDULED' },
+  { awayAbbr: 'NYJ', homeAbbr: 'TEN', kickoff: SUN_EARLY, status: 'SCHEDULED' },
+  { awayAbbr: 'CLE', homeAbbr: 'JAX', kickoff: SUN_EARLY, status: 'SCHEDULED' },
 
   // Sunday late window (2:25 PM Mountain = 4:25 PM Eastern)
   { awayAbbr: 'MIA', homeAbbr: 'LV', kickoff: SUN_LATE, status: 'SCHEDULED' },
   { awayAbbr: 'GB', homeAbbr: 'MIN', kickoff: SUN_LATE, status: 'SCHEDULED' },
+  { awayAbbr: 'WSH', homeAbbr: 'PHI', kickoff: SUN_LATE, status: 'SCHEDULED' },
+
+  // Sunday night (6:20 PM Mountain = 8:20 PM Eastern) — Malik Nabers' game,
+  // which is what makes his questionable tag a late-window decision.
+  { awayAbbr: 'DAL', homeAbbr: 'NYG', kickoff: SUN_NIGHT, status: 'SCHEDULED' },
 
   // Monday night (6:15 PM Mountain = 8:15 PM Eastern)
   { awayAbbr: 'DEN', homeAbbr: 'KC', kickoff: MON_NIGHT, status: 'SCHEDULED' },
@@ -71,4 +79,40 @@ export const GIBBS_ESPN_WEEK1_PROJECTIONS: Record<string, number> = {
 /** Actual points already scored in Week 1 (Thursday game only, so far). */
 export const GIBBS_ESPN_WEEK1_ACTUALS: Record<string, number> = {
   'Brock Purdy': 21.1,
+};
+
+/**
+ * ESPN's own Week 1 projections for the So Good It Hurts roster, read off the
+ * ESPN roster page on 2026-09-13.
+ *
+ * Worth comparing against the Gibbs table above: Bucky Irving and the Baltimore
+ * defense are on BOTH rosters, and ESPN prices Irving at 12.4 in Gibbs but 13.3
+ * here. That gap is this league's yardage bonuses, computed by ESPN itself —
+ * independent confirmation that a player is not worth the same in both leagues.
+ */
+export const SGIH_ESPN_WEEK1_PROJECTIONS: Record<string, number> = {
+  'Jalen Hurts': 21.8,
+  'Jonathan Taylor': 17.6,
+  'Bucky Irving': 13.3,
+  'Drake London': 11.8,
+  'Malik Nabers': 12.2,
+  'Kyle Pitts Sr.': 7.9,
+  'Davante Adams': 12.5,
+  'Terry McLaurin': 10.7,
+  'Baltimore Ravens D/ST': 6.6,
+  'Cam Little': 8.8,
+  'Tony Pollard': 11.5,
+  'Jordan Addison': 8.4,
+  'Aaron Jones Sr.': 9.2,
+  'Rachaad White': 7.9,
+  'Matthew Stafford': 18.5,
+  'Calvin Ridley': 7.0,
+  'Rashod Bateman': 6.3,
+  'Jonah Coleman': 3.7,
+};
+
+/** Both Rams players already played Thursday and scored 4.1. */
+export const SGIH_ESPN_WEEK1_ACTUALS: Record<string, number> = {
+  'Davante Adams': 4.1,
+  'Matthew Stafford': 4.1,
 };

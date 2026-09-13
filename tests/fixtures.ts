@@ -101,6 +101,7 @@ export function makeProjection(points: number, opts: Partial<PricedProjection> =
     ceiling: opts.ceiling ?? points * 1.5,
     expected: opts.expected ?? points * (opts.playProbability ?? 1),
     playProbability: opts.playProbability ?? 1,
+    injuryFactor: opts.injuryFactor ?? opts.playProbability ?? 1,
     confidence: opts.confidence ?? 0.7,
     source: opts.source ?? 'TEST',
     updatedAt: opts.updatedAt ?? new Date('2026-09-12T12:00:00Z'),
