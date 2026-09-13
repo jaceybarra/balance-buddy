@@ -1,5 +1,6 @@
 import { NFL_TEAMS } from './nfl-teams';
 import { ratingFor } from './team-strength';
+import { WEEK1_KNOWN_GAMES, WEEK1_KNOWN_TEAMS } from './week1-2026';
 
 export interface SeedGame {
   season: number;
@@ -42,6 +43,57 @@ function etToUtc(year: number, month: number, day: number, hour: number, minute:
   const isEst = month > 10 || (month === 10 && day >= 1) || month < 2;
   const offset = isEst ? 5 : 4;
   return new Date(Date.UTC(year, month, day, hour + offset, minute));
+}
+
+/** Vegas-style numbers derived from the seeded team ratings. */
+function buildGame(
+  season: number,
+  week: number,
+  homeAbbr: string,
+  awayAbbr: string,
+  kickoff: Date,
+  slot: string,
+  isInternational: boolean,
+): SeedGame {
+  const home = ratingFor(homeAbbr);
+  const away = ratingFor(awayAbbr);
+  // Simple market model: strength differential + 2 points of home field.
+  const edge = home.offense - away.defense - (away.offense - home.defense);
+  const spread = Math.round((edge * 0.28 + 2) * 2) / 2; // positive = home favored
+  const total = Math.round(((home.offense + away.offense) * 0.36 + (110 - home.defense - away.defense) * 0.18) * 2) / 2;
+  const overUnder = Math.min(56, Math.max(33, total));
+  return {
+    season,
+    week,
+    homeAbbr,
+    awayAbbr,
+    kickoff,
+    spread,
+    overUnder,
+    homeImplied: Math.round((overUnder / 2 + spread / 2) * 10) / 10,
+    awayImplied: Math.round((overUnder / 2 - spread / 2) * 10) / 10,
+    isInternational,
+    slot,
+  };
+}
+
+/** Label a known kickoff by the window it falls in. */
+function slotLabelFor(kickoff: Date): string {
+  const et = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    hour: 'numeric',
+    hour12: false,
+  }).formatToParts(kickoff);
+  const day = et.find((x) => x.type === 'weekday')?.value ?? '';
+  const hour = Number(et.find((x) => x.type === 'hour')?.value ?? 13);
+  if (day === 'Thu') return 'TNF';
+  if (day === 'Mon') return 'MNF';
+  if (day === 'Sat') return 'Saturday';
+  if (hour < 12) return 'International';
+  if (hour < 15) return 'Sunday early';
+  if (hour < 19) return 'Sunday late';
+  return 'SNF';
 }
 
 /** Deterministic PRNG so a reseed produces an identical schedule. */
@@ -105,7 +157,18 @@ export function buildSeedSchedule(season: number = SEASON): SeedGame[] {
   const games: SeedGame[] = [];
 
   for (let week = 1; week <= REGULAR_SEASON_WEEKS; week++) {
-    const playing = NFL_TEAMS.filter((t) => t.byeWeek !== week).map((t) => t.abbr);
+    // Week 1's real matchups are known from the user's ESPN roster page, so
+    // they are used verbatim and only the remaining teams are paired up. Every
+    // other week is generated.
+    if (week === 1) {
+      for (const known of WEEK1_KNOWN_GAMES) {
+        games.push(buildGame(season, 1, known.homeAbbr, known.awayAbbr, known.kickoff, slotLabelFor(known.kickoff), false));
+      }
+    }
+
+    const playing = NFL_TEAMS.filter((t) => t.byeWeek !== week)
+      .map((t) => t.abbr)
+      .filter((abbr) => !(week === 1 && WEEK1_KNOWN_TEAMS.has(abbr)));
 
     const rand = mulberry32(season * 1000 + week);
     // Deterministic shuffle.
@@ -124,32 +187,11 @@ export function buildSeedSchedule(season: number = SEASON): SeedGame[] {
       // Alternate home/away by week so nobody is home 18 times.
       const homeAbbr = (p / 2 + week) % 2 === 0 ? teamA : teamB;
       const awayAbbr = homeAbbr === teamA ? teamB : teamA;
-      const slot = slots[Math.min(p / 2, slots.length - 1)]!;
+      // Week 1 already consumed its own slot template for the known games.
+      const slotIndex = week === 1 ? Math.min(p / 2 + WEEK1_KNOWN_GAMES.length, slots.length - 1) : Math.min(p / 2, slots.length - 1);
+      const slot = slots[slotIndex]!;
       const kickoff = kickoffAt(week, slot.dayOffset, slot.hour, slot.minute);
-
-      const home = ratingFor(homeAbbr);
-      const away = ratingFor(awayAbbr);
-      // Simple market model: strength differential + 2 points of home field.
-      const edge = (home.offense - away.defense) - (away.offense - home.defense);
-      const spread = Math.round((edge * 0.28 + 2) * 2) / 2; // positive = home favored
-      const total = Math.round(((home.offense + away.offense) * 0.36 + (110 - home.defense - away.defense) * 0.18) * 2) / 2;
-      const overUnder = Math.min(56, Math.max(33, total));
-      const homeImplied = Math.round((overUnder / 2 + spread / 2) * 10) / 10;
-      const awayImplied = Math.round((overUnder / 2 - spread / 2) * 10) / 10;
-
-      games.push({
-        season,
-        week,
-        homeAbbr,
-        awayAbbr,
-        kickoff,
-        spread,
-        overUnder,
-        homeImplied,
-        awayImplied,
-        isInternational: Boolean(slot.international),
-        slot: slot.label,
-      });
+      games.push(buildGame(season, week, homeAbbr, awayAbbr, kickoff, slot.label, Boolean(slot.international)));
     }
   }
   return games;

@@ -96,7 +96,14 @@ export function PlayerRow({
         <p className="tabular text-sm font-semibold">{pts(player.projection?.expected)}</p>
         {player.projection ? (
           <p className="tabular text-[10px] text-muted-foreground">
-            {pts(player.projection.floor)}–{pts(player.projection.ceiling)}
+            {player.projectionIsReal ? (
+              `${pts(player.projection.floor)}–${pts(player.projection.ceiling)}`
+            ) : (
+              // Never let an app estimate look like a provider number.
+              <span className="text-watch" title="This app's own estimate, not a provider projection">
+                est.
+              </span>
+            )}
           </p>
         ) : null}
       </div>

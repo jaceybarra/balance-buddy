@@ -230,9 +230,16 @@ export async function generateActionsForLeague(ctx: LeagueContext, now: Date = n
   for (const candidate of waiverCandidates) {
     if (candidate.score < 8) continue;
     // Waiver claims are rarely urgent: a claim only earns HIGH when it
-    // measurably improves THIS WEEK's starting lineup.
-    const severity: Severity =
-      candidate.lineupGain >= 2.5 ? 'HIGH' : candidate.lineupGain >= 0.8 ? 'MEDIUM' : 'LOW';
+    // measurably improves THIS WEEK's starting lineup — and only when the
+    // comparison is real data against real data. An estimate-driven "+3.7" is
+    // a lead worth checking, not an instruction, so it stays LOW.
+    const severity: Severity = !candidate.comparisonIsReliable
+      ? 'LOW'
+      : candidate.lineupGain >= 2.5
+        ? 'HIGH'
+        : candidate.lineupGain >= 0.8
+          ? 'MEDIUM'
+          : 'LOW';
     actions.push({
       type: 'WAIVER',
       severity,
@@ -244,7 +251,13 @@ export async function generateActionsForLeague(ctx: LeagueContext, now: Date = n
         ? `Add ${candidate.player.name}, drop ${candidate.dropCandidate.name}.`
         : `Add ${candidate.player.name} — you have an open roster spot.`,
       reason: candidate.reason,
-      confidence: candidate.priority === 'HIGH' ? 0.78 : candidate.priority === 'SPECULATIVE' ? 0.5 : 0.65,
+      confidence: !candidate.comparisonIsReliable
+        ? 0.4
+        : candidate.priority === 'HIGH'
+          ? 0.78
+          : candidate.priority === 'SPECULATIVE'
+            ? 0.5
+            : 0.65,
       deadline: null,
       source: 'engine:waivers',
       dedupeKey: `${ctx.league.id}:WAIVER:${ctx.week}:${candidate.player.id}`,
@@ -256,11 +269,16 @@ export async function generateActionsForLeague(ctx: LeagueContext, now: Date = n
         rosGain: candidate.rosGain,
         evidence: candidate.evidence,
         speculative: candidate.speculative,
+        comparisonIsReliable: candidate.comparisonIsReliable,
       },
     });
   }
 
-  for (const upgrade of rosterUpgrades(ctx, waiverReport).slice(0, 1)) {
+  // "Your weakest bench asset" is a rest-of-season judgment. While ROS numbers
+  // are the app's own estimates and the weekly numbers are ESPN's, that verdict
+  // can contradict what the user sees in ESPN — so it is not claimed at all.
+  const rosComparable = ctx.all.every((pl) => pl.rosIsReal) || ctx.all.every((pl) => !pl.projectionIsReal);
+  for (const upgrade of (rosComparable ? rosterUpgrades(ctx, waiverReport) : []).slice(0, 1)) {
     actions.push({
       type: 'ROSTER',
       severity: 'LOW',
@@ -289,17 +307,24 @@ export async function generateActionsForLeague(ctx: LeagueContext, now: Date = n
     const best = report.options[0];
     // "Add him" and "stream him" are the same move; the waiver card already said it.
     if (alreadyRecommended.has(best.player.id)) continue;
+    const streamComparisonIsReliable =
+      best.player.projectionIsReal || !(report.incumbent?.projectionIsReal ?? false);
     actions.push({
       type: 'STREAMER',
-      // Streaming is a real edge but never an emergency.
-      severity: best.gain >= 5 ? 'MEDIUM' : 'LOW',
+      // Streaming is a real edge but never an emergency — and an estimate
+      // measured against ESPN's real number is not an edge we can stand behind.
+      severity: !streamComparisonIsReliable ? 'LOW' : best.gain >= 5 ? 'MEDIUM' : 'LOW',
       leagueId: ctx.league.id,
       teamId: ctx.team.id,
       playerId: best.player.id,
       headline: `Stream ${best.player.name} at ${report.position}`,
       recommendation: report.recommendation ?? `Pick up ${best.player.name}.`,
-      reason: `${best.drivers.slice(0, 3).join('; ')}. Worth +${best.gain} over ${report.incumbent?.name ?? 'an empty slot'} in ${possessive(ctx.league.name)} scoring.`,
-      confidence: best.confidence,
+      reason: `${best.drivers.slice(0, 3).join('; ')}. Worth +${best.gain} over ${report.incumbent?.name ?? 'an empty slot'} in ${possessive(ctx.league.name)} scoring.${
+        streamComparisonIsReliable
+          ? ''
+          : ` Note: ${best.player.name}'s projection is this app's estimate while ${report.incumbent?.name ?? 'your starter'} is on ESPN's real number — sync ESPN before acting on the gap.`
+      }`,
+      confidence: streamComparisonIsReliable ? best.confidence : 0.4,
       deadline: best.player.game?.kickoff ?? null,
       source: 'engine:streamers',
       dedupeKey: `${ctx.league.id}:STREAMER:${ctx.week}:${report.position}:${best.player.id}`,

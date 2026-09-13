@@ -135,14 +135,16 @@ export class EspnProvider implements FantasyProvider {
   }
 
   async getRoster(providerTeamId: string, week?: number): Promise<ProviderResult<ProviderRosterEntry[]>> {
-    const json: any = await this.raw(['mRoster']);
+    // scoringPeriodId is what makes ESPN attach THIS week's projection to each
+    // player, which is the number shown on the user's roster page.
+    const path = week ? `?scoringPeriodId=${week}` : '';
+    const json: any = await this.raw(['mRoster'], undefined, path);
     const team = (json?.teams ?? []).find((t: any) => String(t.id) === String(providerTeamId));
     const entries: ProviderRosterEntry[] = (team?.roster?.entries ?? []).map((e: any) => ({
-      player: mapPlayer(e?.playerPoolEntry?.player ?? e?.player ?? {}),
+      player: mapPlayer(e?.playerPoolEntry?.player ?? e?.player ?? {}, week),
       slot: (ESPN_SLOT_MAP[e?.lineupSlotId] ?? 'BENCH') as RosterSlot,
       acquisitionType: e?.acquisitionType ?? null,
     }));
-    void week;
     return result(entries);
   }
 
@@ -171,7 +173,7 @@ export class EspnProvider implements FantasyProvider {
     };
     const json: any = await this.raw(['kona_player_info'], filter, `?scoringPeriodId=${week}`);
     const players: ProviderFreeAgent[] = (json?.players ?? []).map((p: any) => {
-      const base = mapPlayer(p?.player ?? {});
+      const base = mapPlayer(p?.player ?? {}, week);
       return {
         ...base,
         availability: p?.status === 'WAIVERS' ? ('WAIVERS' as const) : ('FREE_AGENT' as const),
@@ -252,7 +254,37 @@ function categoryFor(statKey: string): 'OFFENSE' | 'KICKING' | 'DST' {
   return 'OFFENSE';
 }
 
-function mapPlayer(p: any): ProviderPlayerRef {
+/**
+ * Pull a projection out of ESPN's `stats` array.
+ *
+ * Entries are tagged with statSourceId (0 = actual, 1 = projected) and
+ * statSplitTypeId (0 = season, 1 = single week). `appliedTotal` is the value
+ * already scored with THIS league's settings — including its yardage bonuses —
+ * which is exactly what we want and what the user sees on ESPN.
+ */
+function extractProjection(p: any, week?: number): { projected: number | null; season: number | null; actual: number | null } {
+  const stats: any[] = Array.isArray(p?.stats) ? p.stats : [];
+  const find = (sourceId: number, splitType: number, scoringPeriod?: number) =>
+    stats.find(
+      (s) =>
+        s?.statSourceId === sourceId &&
+        s?.statSplitTypeId === splitType &&
+        (scoringPeriod === undefined || s?.scoringPeriodId === scoringPeriod),
+    );
+
+  const weekly = week !== undefined ? find(1, 1, week) : find(1, 1);
+  const season = find(1, 0);
+  const actual = week !== undefined ? find(0, 1, week) : undefined;
+
+  const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? Math.round(v * 100) / 100 : null);
+  return {
+    projected: num(weekly?.appliedTotal),
+    season: num(season?.appliedTotal),
+    actual: num(actual?.appliedTotal),
+  };
+}
+
+function mapPlayer(p: any, week?: number): ProviderPlayerRef {
   const positionId = p?.defaultPositionId;
   const position = (ESPN_POSITION_MAP[positionId] ?? null) as Position | null;
   const eligible = (p?.eligibleSlots ?? [])
@@ -262,8 +294,12 @@ function mapPlayer(p: any): ProviderPlayerRef {
 
   const abbrFromId = ESPN_TEAM_BY_ID[p?.proTeamId ?? 0] ?? null;
   const nflTeamAbbr = canonicalTeamAbbr(abbrFromId);
+  const projection = extractProjection(p, week);
 
   return {
+    projectedPoints: projection.projected,
+    seasonProjectedPoints: projection.season,
+    actualPoints: projection.actual,
     providerPlayerId: String(p?.id ?? ''),
     fullName: p?.fullName ?? [p?.firstName, p?.lastName].filter(Boolean).join(' '),
     position,

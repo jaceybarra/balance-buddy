@@ -251,7 +251,14 @@ export function swapConfidence(inPlayer: PlayerCard, outPlayer: PlayerCard | nul
     (inPlayer.onBye || outPlayer?.onBye ? -0.1 : 0); // a bye is a certainty, not a risk
 
   const raw = 0.45 + gapScore * 0.33 + (trust - 0.6) * 0.3 - injuryDrag;
-  return Math.round(Math.min(0.93, Math.max(0.35, raw)) * 100) / 100;
+
+  // A start/sit call built on the app's own estimate is not worth a confident
+  // number, however big the modeled gap looks. Real provider projections are
+  // what earn confidence above a coin flip.
+  const estimateOnly = !inPlayer.projectionIsReal || (outPlayer !== null && !outPlayer.projectionIsReal);
+  const ceiling = estimateOnly ? 0.6 : 0.93;
+
+  return Math.round(Math.min(ceiling, Math.max(0.35, raw)) * 100) / 100;
 }
 
 function swapReason(inPlayer: PlayerCard, outPlayer: PlayerCard | null): string {

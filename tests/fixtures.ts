@@ -87,6 +87,8 @@ export function makePlayer(overrides: Partial<PlayerCard> & { name: string; posi
     rosPoints: overrides.rosPoints ?? null,
     usage: overrides.usage ?? null,
     bonusUpside: overrides.bonusUpside ?? 0,
+    projectionIsReal: overrides.projectionIsReal ?? true,
+    rosIsReal: overrides.rosIsReal ?? true,
     percentOwned: overrides.percentOwned ?? null,
     trendingAdds: overrides.trendingAdds ?? null,
   };

@@ -19,6 +19,11 @@ export interface WaiverCandidate {
   evidence: string[];
   /** True for "get him before the league notices" adds. */
   speculative: boolean;
+  /**
+   * False when this compares an app ESTIMATE against a real provider number.
+   * Such a comparison cannot be trusted to a tenth of a point, and the UI says so.
+   */
+  comparisonIsReliable: boolean;
 }
 
 export interface WaiverReport {
@@ -98,6 +103,12 @@ export async function buildWaiverReport(ctx: LeagueContext, limit = 8, now: Date
     // starter who simply isn't better than what I already have.
     const isBackup = (candidate.depthChartOrder ?? 1) >= 2;
     const speculative = lineupGain <= 0.5 && opportunity >= 30 && (isBackup || (candidate.trendingAdds ?? 0) > 5000);
+
+    // Comparing an estimated free-agent projection against ESPN's real number
+    // for a rostered player is apples to oranges. Flag it rather than quietly
+    // presenting the difference as fact.
+    const rosterHasRealProjections = ctx.all.some((pl) => pl.projectionIsReal);
+    const comparisonIsReliable = candidate.projectionIsReal || !rosterHasRealProjections;
     scored.push({
       player: candidate,
       score,
@@ -105,9 +116,10 @@ export async function buildWaiverReport(ctx: LeagueContext, limit = 8, now: Date
       lineupGain,
       rosGain,
       dropCandidate,
-      reason: buildReason(candidate, lineupGain, rosGain, evidence, speculative),
+      reason: buildReason(candidate, lineupGain, rosGain, evidence, speculative, comparisonIsReliable),
       evidence,
       speculative,
+      comparisonIsReliable,
     });
   }
 
@@ -197,15 +209,26 @@ function buildEvidence(p: PlayerCard): string[] {
   return out;
 }
 
-function buildReason(p: PlayerCard, lineupGain: number, rosGain: number, evidence: string[], speculative: boolean): string {
+function buildReason(
+  p: PlayerCard,
+  lineupGain: number,
+  rosGain: number,
+  evidence: string[],
+  speculative: boolean,
+  comparisonIsReliable = true,
+): string {
+  const caveat = comparisonIsReliable
+    ? ''
+    : ` Note: ${p.name}'s projection is this app's own estimate, while your rostered players are on ESPN's real numbers — so treat the point difference as a lead to check, not a fact. Sync ESPN for a like-for-like comparison.`;
+
   if (speculative) {
-    return `Speculative add: ${evidence.slice(0, 2).join(', ') || 'rising role'}. He does not start for you today, but he is one injury or one usage bump away from mattering.`;
+    return `Speculative add: ${evidence.slice(0, 2).join(', ') || 'rising role'}. He does not start for you today, but he is one injury or one usage bump away from mattering.${caveat}`;
   }
   const pieces: string[] = [];
   if (lineupGain > 0.3) pieces.push(`starts for you immediately (+${lineupGain} to this week's lineup)`);
   if (rosGain > 0.3) pieces.push(`+${rosGain} pts/week rest-of-season over the player he replaces`);
   if (pieces.length === 0) pieces.push('bench depth — he does not beat anyone in your lineup this week');
-  return `${pieces.join('; ')}. ${evidence.slice(0, 3).join(', ')}.`;
+  return `${pieces.join('; ')}. ${evidence.slice(0, 3).join(', ')}.${caveat}`;
 }
 
 function priorityFor(score: number, lineupGain: number, speculative: boolean): WaiverPriority {

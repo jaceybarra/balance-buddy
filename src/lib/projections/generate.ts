@@ -3,7 +3,7 @@ import { parseJson, stringify } from '../json';
 import { zStatLine, type StatLine } from '../scoring/stats';
 import { modelProjection, type GameContext } from './model';
 import { modelDstProjection } from './dst';
-import { GLOBAL_SCOPE, PROJECTION_SOURCES, ROS_WEEK, SOURCE_WEIGHT, USAGE_BASELINE_WEEK, enabledSources } from './sources';
+import { GLOBAL_SCOPE, PROJECTION_SOURCES, ROS_WEEK, SOURCE_WEIGHT, USAGE_BASELINE_WEEK, enabledSources, isRealSource } from './sources';
 import type { InjuryStatus, Position } from '../domain/enums';
 import { kickoffSlot } from '../time';
 
@@ -172,6 +172,14 @@ export async function buildConsensus(season: number, week: number): Promise<numb
     const list = byPlayer.get(row.playerId) ?? [];
     list.push(row);
     byPlayer.set(row.playerId, list);
+  }
+
+  // Never average a real provider projection with the app's own estimate.
+  // If any real source exists for a player, the estimate is dropped entirely —
+  // blending them would quietly corrupt a number the user can verify in ESPN.
+  for (const [playerId, sources] of byPlayer) {
+    const real = sources.filter((s) => isRealSource(s.source));
+    if (real.length > 0) byPlayer.set(playerId, real);
   }
 
   let count = 0;

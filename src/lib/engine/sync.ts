@@ -7,6 +7,7 @@ import { resolvePlayer, findPlayerIdByProvider } from '../identity/resolve';
 import { recordInjuryChange } from './news';
 import { finishSync, startSync } from '../data/freshness';
 import { generateProjections } from '../projections/generate';
+import { PROJECTION_SOURCES, ROS_WEEK } from '../projections/sources';
 import { regenerateActions } from './actions';
 import { getSeasonState, invalidateSeasonCache } from '../season';
 import { canonicalTeamAbbr } from '../seed/nfl-teams';
@@ -247,18 +248,29 @@ export async function syncEspnLeague(leagueId: string): Promise<SyncStepResult> 
       }
 
       // --- my roster becomes authoritative
+      const state = await getSeasonState();
       const mine = await prisma.fantasyTeam.findFirst({ where: { leagueId, isMine: true } });
       if (mine?.providerTeamId) {
-        const roster = await provider.getRoster(mine.providerTeamId);
+        const roster = await provider.getRoster(mine.providerTeamId, state.week);
         if (roster.data.length > 0) {
           await applyRoster(mine.id, roster.data);
           notes.push(`${roster.data.length} roster spots synced`);
           touched += roster.data.length;
+
+          // ESPN's own projections, already priced in THIS league's settings.
+          // They outrank the app's internal model everywhere, which is what
+          // keeps the numbers identical to what the user sees on ESPN.
+          const projectionCount = await storeEspnProjections(
+            leagueId,
+            league.season,
+            state.week,
+            roster.data.map((r) => r.player),
+          );
+          if (projectionCount > 0) notes.push(`${projectionCount} ESPN projections`);
         }
       }
 
       // --- free agents
-      const state = await getSeasonState();
       try {
         const fas = await provider.getFreeAgents(state.week, 150);
         let faCount = 0;
@@ -273,6 +285,9 @@ export async function syncEspnLeague(leagueId: string): Promise<SyncStepResult> 
             injuryStatus: fa.injuryStatus ?? 'HEALTHY',
             eligiblePositions: fa.eligiblePositions,
           });
+          if (fa.projectedPoints != null || fa.seasonProjectedPoints != null) {
+            await storeEspnProjections(leagueId, league.season, state.week, [{ ...fa, providerPlayerId: fa.providerPlayerId }]);
+          }
           await prisma.freeAgentSnapshot.upsert({
             where: { leagueId_playerId: { leagueId, playerId } },
             create: {
@@ -348,6 +363,81 @@ export async function syncEspnLeague(leagueId: string): Promise<SyncStepResult> 
     },
     leagueId,
   );
+}
+
+/**
+ * Persist ESPN's projections as league-scoped rows.
+ *
+ * They are stored as POINTS rather than a stat line because ESPN has already
+ * applied this league's scoring — reverse-engineering a stat line to match
+ * would be inventing detail the provider never gave us. Floor and ceiling are
+ * derived around that mean and labeled as modeled.
+ */
+async function storeEspnProjections(
+  leagueId: string,
+  season: number,
+  week: number,
+  players: { providerPlayerId: string; projectedPoints?: number | null; seasonProjectedPoints?: number | null }[],
+): Promise<number> {
+  let count = 0;
+  for (const player of players) {
+    const playerId = await findPlayerIdByProvider('ESPN', player.providerPlayerId);
+    if (!playerId) continue;
+
+    if (player.projectedPoints != null) {
+      await prisma.projection.upsert({
+        where: {
+          playerId_season_week_source_leagueScope: { playerId, season, week, source: PROJECTION_SOURCES.ESPN, leagueScope: leagueId },
+        },
+        create: {
+          playerId,
+          season,
+          week,
+          source: PROJECTION_SOURCES.ESPN,
+          leagueScope: leagueId,
+          leagueId,
+          statLineJson: '{}',
+          providerPoints: player.projectedPoints,
+          confidence: 0.8,
+        },
+        update: { providerPoints: player.projectedPoints, confidence: 0.8 },
+      });
+      count++;
+    }
+
+    // Season projection -> a real rest-of-season per-game number, which is what
+    // drop and trade decisions are judged on.
+    if (player.seasonProjectedPoints != null) {
+      const gamesLeft = Math.max(1, 18 - week + 1);
+      await prisma.projection.upsert({
+        where: {
+          playerId_season_week_source_leagueScope: {
+            playerId,
+            season,
+            week: ROS_WEEK,
+            source: PROJECTION_SOURCES.ESPN,
+            leagueScope: leagueId,
+          },
+        },
+        create: {
+          playerId,
+          season,
+          week: ROS_WEEK,
+          source: PROJECTION_SOURCES.ESPN,
+          leagueScope: leagueId,
+          leagueId,
+          statLineJson: '{}',
+          providerPoints: Math.round((player.seasonProjectedPoints / gamesLeft) * 100) / 100,
+          confidence: 0.7,
+        },
+        update: {
+          providerPoints: Math.round((player.seasonProjectedPoints / gamesLeft) * 100) / 100,
+          confidence: 0.7,
+        },
+      });
+    }
+  }
+  return count;
 }
 
 /** Replace a league's scoring rules with provider-supplied ones. */

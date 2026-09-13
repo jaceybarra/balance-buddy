@@ -112,6 +112,15 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
                 floor {pts(entry.card?.projection?.floor)} · ceiling {pts(entry.card?.projection?.ceiling)} · after injury
                 risk {pts(entry.card?.projection?.expected)}
               </p>
+              <p className="mt-1 text-[11px]">
+                {entry.card?.projectionIsReal ? (
+                  <span className="text-good">Provider projection — matches what you see in ESPN</span>
+                ) : (
+                  <span className="text-watch">
+                    This app&apos;s own estimate. Sync ESPN to replace it with the real projection.
+                  </span>
+                )}
+              </p>
               <p className="tabular mt-2 text-xs text-muted-foreground">
                 Rest of season: {pts(entry.card?.rosPerGame)}/wk ({pts(entry.card?.rosPoints)} total)
               </p>

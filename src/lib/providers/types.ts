@@ -49,6 +49,16 @@ export interface ProviderPlayerRef {
   percentOwned?: number | null;
   percentStarted?: number | null;
   byeWeek?: number | null;
+  /**
+   * The provider's own projection for the requested week, ALREADY PRICED in
+   * this league's scoring settings. This is the number the user sees on the
+   * platform, so it is what the app shows.
+   */
+  projectedPoints?: number | null;
+  /** Provider's full-season projection, used for rest-of-season value. */
+  seasonProjectedPoints?: number | null;
+  /** Points actually scored in the requested week so far. */
+  actualPoints?: number | null;
 }
 
 export interface ProviderRosterEntry {

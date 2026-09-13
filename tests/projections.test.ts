@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { modelProjection } from '@/lib/projections/model';
 import { modelDstProjection } from '@/lib/projections/dst';
 import { priceProjection, bonusUpside } from '@/lib/projections/price';
+import { PROJECTION_SOURCES, isRealSource, sourceRank } from '@/lib/projections/sources';
+import { swapConfidence } from '@/lib/optimizer/lineup';
+import { makePlayer, makeProjection } from './fixtures';
 import { scorePoints } from '@/lib/scoring/engine';
 import { gibbsConfig, sgihConfig } from './fixtures';
 import type { StatLine } from '@/lib/scoring/stats';
@@ -209,5 +212,55 @@ describe('pricing a projection for a league', () => {
     expect(priced.source).toContain('points as provided');
     // Confidence is capped because this league's scoring was NOT applied.
     expect(priced.confidence).toBeLessThanOrEqual(0.45);
+  });
+});
+
+describe('real projections outrank the app’s own model', () => {
+  /**
+   * Regression test for a real defect: the app recommended starting Jayden Reed
+   * over Christian Watson off its internal model, while ESPN — the source the
+   * user actually sees — projected the opposite (Watson 9.3, Reed 8.1).
+   * A provider number must always win, and an estimate must never be presented
+   * with the confidence of real data.
+   */
+  it('ranks a provider projection above the baseline model', () => {
+    expect(sourceRank(PROJECTION_SOURCES.ESPN)).toBeGreaterThan(sourceRank(PROJECTION_SOURCES.BASELINE));
+    expect(sourceRank(PROJECTION_SOURCES.ESPN)).toBeGreaterThan(sourceRank(PROJECTION_SOURCES.CONSENSUS));
+    expect(sourceRank(PROJECTION_SOURCES.MANUAL)).toBeGreaterThan(sourceRank(PROJECTION_SOURCES.CSV));
+  });
+
+  it('classifies provider and human sources as real, and the model as not', () => {
+    expect(isRealSource(PROJECTION_SOURCES.ESPN)).toBe(true);
+    expect(isRealSource(PROJECTION_SOURCES.CSV)).toBe(true);
+    expect(isRealSource(PROJECTION_SOURCES.MANUAL)).toBe(true);
+    expect(isRealSource(PROJECTION_SOURCES.BASELINE)).toBe(false);
+    expect(isRealSource(PROJECTION_SOURCES.CONSENSUS)).toBe(false);
+  });
+
+  it('caps confidence when a start/sit call rests on an estimate', () => {
+    const estimated = (name: string, points: number) =>
+      makePlayer({ name, position: 'WR', projection: makeProjection(points), projectionIsReal: false });
+    const real = (name: string, points: number) =>
+      makePlayer({ name, position: 'WR', projection: makeProjection(points), projectionIsReal: true });
+
+    // A huge modeled gap still cannot buy confidence above a coin flip.
+    expect(swapConfidence(estimated('A', 20), estimated('B', 4), 16)).toBeLessThanOrEqual(0.6);
+    // The same gap on real data can.
+    expect(swapConfidence(real('A', 20), real('B', 4), 16)).toBeGreaterThan(0.7);
+    // Mixing one of each is still untrustworthy.
+    expect(swapConfidence(estimated('A', 20), real('B', 4), 16)).toBeLessThanOrEqual(0.6);
+  });
+
+  it('prices a provider points-only projection without inventing a stat line', () => {
+    const priced = priceProjection({
+      statLine: {},
+      config: gibbsConfig,
+      injuryStatus: 'HEALTHY',
+      confidence: 0.8,
+      source: 'ESPN',
+      providerPoints: 9.3,
+    });
+    expect(priced.points).toBe(9.3);
+    expect(priced.breakdown).toHaveLength(0);
   });
 });

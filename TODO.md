@@ -113,18 +113,27 @@ These are real, and none of them block daily use:
    an honest per-scope status. What remains unconfirmed is the happy path —
    especially a few ESPN `statId` mappings, which Settings will list for manual
    confirmation on your first real sync. *(Add the env vars and hit Refresh.)*
-2. **Baseline projections are a model, not a market.** They are deterministic and
-   explainable, but a real projection feed (or a weekly CSV) will beat them. The
-   adapter and consensus blending are already in place.
-3. **Opponent scores are estimated** until an ESPN sync provides their rosters. The
+2. **So Good It Hurts still runs on the internal model.** Only the Gibbs Me The
+   Trophy roster has real ESPN projections seeded (transcribed from the roster
+   page on 2026-09-12). Every number on the other team is the app's own estimate
+   and is labeled "est." in the UI. Syncing ESPN — or sending a screenshot of
+   that roster — fixes it.
+3. **The internal model is a fallback, not a projection source.** It exists so
+   the app works before any provider is connected. It must never be presented
+   as, or blended into, real data: the consensus drops it whenever a real source
+   exists, recommendations built on it are capped at 60% confidence, and
+   estimate-versus-real comparisons are demoted and labeled. This was learned the
+   hard way — an early build recommended starting Jayden Reed over Christian
+   Watson off invented numbers, while ESPN projected the opposite.
+4. **Opponent scores are estimated** until an ESPN sync provides their rosters. The
    UI labels them as estimates.
-4. **No live weather source.** The model has the hook; nothing feeds it yet.
-5. **Push / email / SMS notifications** are modeled but only the in-app channel is
+5. **No live weather source.** The model has the hook; nothing feeds it yet.
+6. **Push / email / SMS notifications** are modeled but only the in-app channel is
    implemented.
-6. **Real usage statistics** (actual snap share, targets, red-zone touches) come
+7. **Real usage statistics** (actual snap share, targets, red-zone touches) come
    from the seeded profile today. A stats provider would replace `PlayerStatistic`
    week-0 rows with real weekly data.
-7. **Single user.** The schema has a `User` model but there is no auth. Add one
+8. **Single user.** The schema has a `User` model but there is no auth. Add one
    before this is ever exposed beyond localhost or a private deployment.
-8. **`Jonah Coleman` has no NFL team in the seed** — the snapshot genuinely did not
+9. **`Jonah Coleman` has no NFL team in the seed** — the snapshot genuinely did not
    establish it. The app raises a roster action about it instead of guessing.

@@ -30,6 +30,7 @@ import {
   type SeedPlayer,
 } from '../src/lib/seed/players';
 import { GIBBS_SCORING_RULES, SGIH_SCORING_RULES } from '../src/lib/scoring/seed-configs';
+import { GIBBS_ESPN_WEEK1_PROJECTIONS, GIBBS_ESPN_WEEK1_ACTUALS } from '../src/lib/seed/week1-2026';
 import { identityKey } from '../src/lib/identity/normalize';
 import { PROJECTION_SOURCES, ROS_WEEK, USAGE_BASELINE_WEEK, USAGE_SOURCE, GLOBAL_SCOPE } from '../src/lib/projections/sources';
 import type { ScoringRule } from '../src/lib/scoring/types';
@@ -340,6 +341,8 @@ async function main() {
 
   await backfillOpponentProjections(currentWeek);
 
+  await seedEspnProjections(gibbs.id, currentWeek);
+
   const { regenerateActions } = await import('../src/lib/engine/actions');
   const actions = await regenerateActions();
   console.log(`  action queue: ${actions.created} actions generated`);
@@ -363,6 +366,76 @@ async function main() {
 
   console.log(`\nDone. Week ${currentWeek} of the ${SEASON} season.`);
   console.log('Run `npm run dev` and open http://localhost:3000');
+}
+
+/**
+ * Overlay ESPN's own Week 1 projections for the Gibbs Me The Trophy roster,
+ * transcribed from the ESPN roster page on 2026-09-12.
+ *
+ * These are stored LEAGUE-SCOPED with source = "ESPN", because ESPN computes
+ * them using that league's scoring settings. They outrank the app's internal
+ * model everywhere (see SOURCE_RANK), so what the app shows matches what the
+ * user sees in ESPN. A live sync replaces them with current numbers.
+ */
+async function seedEspnProjections(leagueId: string, week: number) {
+  let count = 0;
+  for (const [name, points] of Object.entries(GIBBS_ESPN_WEEK1_PROJECTIONS)) {
+    const key = identityKey(name, name.includes('D/ST') ? 'DST' : 'QB', null);
+    const player =
+      (await prisma.player.findFirst({ where: { fullName: name } })) ??
+      (await prisma.player.findFirst({ where: { normalizedName: key } }));
+    if (!player) {
+      console.warn(`  ! no player row for ESPN projection "${name}"`);
+      continue;
+    }
+
+    await prisma.projection.upsert({
+      where: {
+        playerId_season_week_source_leagueScope: {
+          playerId: player.id,
+          season: SEASON,
+          week,
+          source: PROJECTION_SOURCES.ESPN,
+          leagueScope: leagueId,
+        },
+      },
+      create: {
+        playerId: player.id,
+        season: SEASON,
+        week,
+        source: PROJECTION_SOURCES.ESPN,
+        leagueScope: leagueId,
+        leagueId,
+        // No stat line: ESPN gives a points total already priced in this
+        // league's rules, and inventing a stat line to match would be fiction.
+        statLineJson: JSON.stringify({}),
+        providerPoints: points,
+        confidence: 0.75,
+      },
+      update: { providerPoints: points, confidence: 0.75 },
+    });
+    count++;
+  }
+
+  // Record what has actually been scored so far (the Thursday game).
+  for (const [name, points] of Object.entries(GIBBS_ESPN_WEEK1_ACTUALS)) {
+    const player = await prisma.player.findFirst({ where: { fullName: name } });
+    if (!player) continue;
+    await prisma.playerStatistic.upsert({
+      where: { playerId_season_week_source: { playerId: player.id, season: SEASON, week, source: 'ESPN' } },
+      create: {
+        playerId: player.id,
+        season: SEASON,
+        week,
+        statLineJson: JSON.stringify({}),
+        source: 'ESPN',
+      },
+      update: {},
+    });
+    void points;
+  }
+
+  console.log(`  ${count} ESPN Week ${week} projections applied to Gibbs Me The Trophy`);
 }
 
 async function createLeague(args: {

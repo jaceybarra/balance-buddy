@@ -2,7 +2,7 @@ import { prisma } from '../db';
 import { getSeasonState } from '../season';
 import { loadScoringConfigCached } from './scoring';
 import { priceProjection, bonusUpside, type PricedProjection } from '../projections/price';
-import { PROJECTION_SOURCES, ROS_WEEK, USAGE_BASELINE_WEEK } from '../projections/sources';
+import { GLOBAL_SCOPE, PROJECTION_SOURCES, ROS_WEEK, USAGE_BASELINE_WEEK, isRealSource, sourceRank } from '../projections/sources';
 import { parseJson, zStringArray } from '../json';
 import { zStatLine, type StatLine } from '../scoring/stats';
 import { lockState, DEFAULT_LOCK_WARNING_MINUTES, kickoffSlot } from '../time';
@@ -58,6 +58,13 @@ export interface PlayerCard {
   usage: UsageInfo | null;
   /** Extra points this league's bonuses add in a ceiling outcome. */
   bonusUpside: number;
+  /**
+   * False when the projection is the app's own model rather than a provider's.
+   * Drives the "estimate" badge and caps recommendation confidence.
+   */
+  projectionIsReal: boolean;
+  /** Same question for the rest-of-season number, which drives drop decisions. */
+  rosIsReal: boolean;
   percentOwned: number | null;
   trendingAdds: number | null;
 }
@@ -213,7 +220,14 @@ export async function buildPlayerCards(
   const [players, projections, usageRows, games, faRows] = await Promise.all([
     prisma.player.findMany({ where: { id: { in: playerIds } } }),
     prisma.projection.findMany({
-      where: { playerId: { in: playerIds }, season, week: { in: [week, ROS_WEEK] } },
+      where: {
+        playerId: { in: playerIds },
+        season,
+        week: { in: [week, ROS_WEEK] },
+        // ESPN prices a projection with each league's own settings, so those
+        // rows are league-scoped. Global rows apply everywhere.
+        leagueScope: { in: opts.leagueId ? [GLOBAL_SCOPE, opts.leagueId] : [GLOBAL_SCOPE, config.leagueId] },
+      },
     }),
     prisma.playerStatistic.findMany({ where: { playerId: { in: playerIds }, season, week: USAGE_BASELINE_WEEK } }),
     prisma.nFLGame.findMany({
@@ -291,13 +305,15 @@ export async function buildPlayerCards(
     // bonuses correct, then we multiply by the games left.
     const rosRow = rosProjByPlayer.get(player.id);
     const rosLine = rosRow ? parseJson<StatLine>(rosRow.statLineJson, zStat, {}) : null;
-    const rosPerGame = rosLine
+    const rosPerGame = rosRow
       ? priceProjection({
-          statLine: rosLine,
+          statLine: rosLine ?? {},
           config,
           injuryStatus,
-          confidence: rosRow?.confidence ?? 0.5,
-          source: rosRow?.source ?? 'UNKNOWN',
+          confidence: rosRow.confidence,
+          source: rosRow.source,
+          // A provider's rest-of-season number arrives as points, not a stat line.
+          providerPoints: rosRow.providerPoints,
         }).points
       : null;
 
@@ -337,15 +353,21 @@ export async function buildPlayerCards(
           }
         : null,
       bonusUpside: statLine ? bonusUpside(statLine, ceilLine, config) : 0,
+      projectionIsReal: weekRow ? isRealSource(weekRow.source) : false,
+      rosIsReal: rosRow ? isRealSource(rosRow.source) : false,
       percentOwned: fa?.percentOwned ?? null,
       trendingAdds: fa?.trendingAdds ?? null,
     };
   });
 }
 
+/**
+ * Pick the best projection when several exist for one player.
+ * A real provider number always beats the app's own estimate — see SOURCE_RANK.
+ */
 function preferProjection(candidate: { source: string; updatedAt: Date }, current: { source: string; updatedAt: Date }): boolean {
-  if (candidate.source === PROJECTION_SOURCES.CONSENSUS && current.source !== PROJECTION_SOURCES.CONSENSUS) return true;
-  if (current.source === PROJECTION_SOURCES.CONSENSUS) return false;
+  const rank = sourceRank(candidate.source) - sourceRank(current.source);
+  if (rank !== 0) return rank > 0;
   return candidate.updatedAt > current.updatedAt;
 }
 
