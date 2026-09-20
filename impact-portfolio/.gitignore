@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------------------
+# Personal data and source documents NEVER go into version control.
+# ---------------------------------------------------------------------------
+
+# Your PDF exports from the work device
+source-pdfs/*
+!source-pdfs/.gitkeep
+*.pdf
+
+# Extraction intermediates (they contain the full document text)
+work/*
+!work/.gitkeep
+
+# The real dataset, import history, corrections and version snapshots
+data/*
+!data/.gitkeep
+
+# Generated exports
+impact-summary-*.md
+impact-summary-*.txt
+
+# Local noise
+.DS_Store
+node_modules/
+*.log
+
+# NOTE: demo/ IS committed on purpose - it is synthetic, clearly labelled,
+# and never merged into data/.

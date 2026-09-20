@@ -1,0 +1,1865 @@
+{
+  "conflicts": [
+    {
+      "detectedAt": "2026-09-20T19:00:57.464Z",
+      "existing": {
+        "evidence": [
+          "ex_8b97573d2619",
+          "ex_02612c37d875"
+        ],
+        "period": "per week",
+        "unit": "hours per week",
+        "value": 2,
+        "valueText": "about two hours"
+      },
+      "importId": "imp002-demo0002",
+      "incoming": {
+        "evidence": [
+          "ex_b6d8e7e651ec"
+        ],
+        "period": "per week",
+        "unit": "hours per week",
+        "value": 3,
+        "valueText": "about three hours"
+      },
+      "label": "Time saved per intake coordinator",
+      "metricId": "met_da5354331bfe",
+      "resolution": "unresolved",
+      "type": "metric_value_conflict"
+    }
+  ],
+  "contributions": [
+    {
+      "action": "Ran the discovery session and mapped the current referral queue.",
+      "businessRelevance": "Establishes the baseline the later triage work is measured against.",
+      "businessRelevanceClaim": "interpretation",
+      "confidence": "high",
+      "customerId": "cust_04e898d0698d",
+      "datePrecision": "week",
+      "deliverable": "Documented map of three handoff points causing rework.",
+      "evidence": [
+        "ex_ca975719e1ed",
+        "ex_209fb7523dd7"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "multi_source_not_verified"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.454Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_9a1db7e55feb",
+      "kind": "activity",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_62fff97dc220",
+      "nextSteps": [
+        "Draft a proposed triage flow"
+      ],
+      "outcome": null,
+      "outcomeClaim": null,
+      "overridden": false,
+      "problem": "Referral queue rework was not understood; handoff points were undocumented.",
+      "projectId": "proj_62fff97dc220",
+      "reportingPeriod": "Week of 2026-05-08",
+      "role": "contributed",
+      "roleClaim": "needs_clarification",
+      "skills": [
+        "process mapping",
+        "customer discovery"
+      ],
+      "sources": [
+        "gemini",
+        "zoom"
+      ],
+      "status": "completed",
+      "supportingFacts": [
+        "Source states three handoff points causing rework were identified in this session."
+      ],
+      "title": "Intake triage discovery session with Northwind",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-05-10",
+        "start": "2026-05-04"
+      }
+    },
+    {
+      "action": "Drafted the triage flow and shared it with the operations lead.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_04e898d0698d",
+      "datePrecision": "week",
+      "deliverable": "Proposed triage flow document.",
+      "evidence": [
+        "ex_de9f4353bfa1"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "missing_in_latest_export"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.454Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        },
+        {
+          "at": "2026-09-20T19:00:57.464Z",
+          "change": "not present in this cumulative export",
+          "importId": "imp002-demo0002"
+        }
+      ],
+      "id": "con_40daf3382d27",
+      "kind": "deliverable",
+      "lastSeenImport": "imp001-demo0001",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_62fff97dc220",
+      "nextSteps": [],
+      "outcome": null,
+      "outcomeClaim": null,
+      "overridden": false,
+      "problem": "No agreed routing design for the referral queue.",
+      "projectId": "proj_62fff97dc220",
+      "reportingPeriod": "Week of 2026-05-15",
+      "role": "contributed",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "solution design"
+      ],
+      "sources": [
+        "gemini"
+      ],
+      "status": "completed",
+      "supportingFacts": [],
+      "title": "Proposed triage flow shared with Northwind operations",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-05-17",
+        "start": "2026-05-11"
+      }
+    },
+    {
+      "action": "Raised automating follow-up reminders in the working session.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_04e898d0698d",
+      "datePrecision": "week",
+      "deliverable": null,
+      "evidence": [
+        "ex_de9f4353bfa1"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "proposal_only",
+        "missing_in_latest_export"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.454Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        },
+        {
+          "at": "2026-09-20T19:00:57.464Z",
+          "change": "not present in this cumulative export",
+          "importId": "imp002-demo0002"
+        }
+      ],
+      "id": "con_5b1c1b0e12a2",
+      "kind": "activity",
+      "lastSeenImport": "imp001-demo0001",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": null,
+      "nextSteps": [],
+      "outcome": null,
+      "outcomeClaim": null,
+      "overridden": false,
+      "problem": "Follow-up reminders are manual.",
+      "projectId": "proj_62fff97dc220",
+      "reportingPeriod": "Week of 2026-05-15",
+      "role": "contributed",
+      "roleClaim": "stated_in_source",
+      "skills": [],
+      "sources": [
+        "gemini"
+      ],
+      "status": "proposed",
+      "supportingFacts": [],
+      "title": "Automating follow-up reminders (discussed only)",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-05-17",
+        "start": "2026-05-11"
+      }
+    },
+    {
+      "action": "Built the triage routing workflow and deployed it to the customer sandbox.",
+      "businessRelevance": "Reduces manual handling in the referral queue for four coordinators.",
+      "businessRelevanceClaim": "interpretation",
+      "confidence": "high",
+      "correctionReason": "DEMO correction: I built and deployed this myself; the weekly summary did not say so explicitly.",
+      "customerId": "cust_04e898d0698d",
+      "datePrecision": "week",
+      "deliverable": "Triage routing workflow running in the Northwind sandbox.",
+      "evidence": [
+        "ex_8b97573d2619"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "user_corrected"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.454Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_5cf722061aa4",
+      "kind": "deliverable",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_62fff97dc220",
+      "nextSteps": [],
+      "outcome": "Operations reported an estimated saving of about two hours per week per intake coordinator.",
+      "outcomeClaim": "stated_in_source",
+      "overridden": true,
+      "problem": "Three handoff points were causing rework in the referral queue.",
+      "projectId": "proj_62fff97dc220",
+      "reportingPeriod": "Week of 2026-05-29",
+      "role": "led",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "workflow automation"
+      ],
+      "sourceSaysNow": {
+        "at": "2026-09-20T19:00:57.466Z",
+        "outcome": "Operations reported an estimated saving of about two hours per week per intake coordinator.",
+        "role": "led",
+        "status": "completed"
+      },
+      "sources": [
+        "gemini"
+      ],
+      "status": "completed",
+      "supportingFacts": [
+        "Source states four intake coordinators.",
+        "Source states the workflow was deployed to the sandbox."
+      ],
+      "title": "Triage routing workflow deployed to Northwind sandbox",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-05-31",
+        "start": "2026-05-25"
+      }
+    },
+    {
+      "action": "Led the preparation session and assembled the usage narrative and renewal risk summary.",
+      "businessRelevance": "Supports renewal decision-making for the account team.",
+      "businessRelevanceClaim": "interpretation",
+      "confidence": "high",
+      "customerId": "cust_3c98a0d9d3df",
+      "datePrecision": "week",
+      "deliverable": "QBR usage narrative and renewal risk summary.",
+      "evidence": [
+        "ex_481c4eab2a6c",
+        "ex_261a0ab10920"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "multi_source_not_verified"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.455Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_7366d953b5c0",
+      "kind": "deliverable",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_e0eea5c7f008",
+      "nextSteps": [],
+      "outcome": null,
+      "outcomeClaim": null,
+      "overridden": false,
+      "problem": "The account team had no consolidated usage or renewal-risk view ahead of the QBR.",
+      "projectId": "proj_e0eea5c7f008",
+      "reportingPeriod": "Week of 2026-06-05",
+      "role": "led",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "account strategy",
+        "executive communication"
+      ],
+      "sources": [
+        "gemini",
+        "zoom"
+      ],
+      "status": "completed",
+      "supportingFacts": [
+        "Source states a renewal risk summary was produced for the account team."
+      ],
+      "title": "Cedar Valley QBR preparation",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-06-07",
+        "start": "2026-06-01"
+      }
+    },
+    {
+      "action": "Delivered the quarterly business review to the customer.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_3c98a0d9d3df",
+      "datePrecision": "week",
+      "deliverable": "Quarterly business review session.",
+      "evidence": [
+        "ex_abc8b8e1bed2"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.455Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_5b1e4992db78",
+      "kind": "deliverable",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_e0eea5c7f008",
+      "nextSteps": [],
+      "outcome": "Customer confirmed the adoption plan for the next quarter.",
+      "outcomeClaim": "stated_in_source",
+      "overridden": false,
+      "problem": null,
+      "projectId": "proj_e0eea5c7f008",
+      "reportingPeriod": "Week of 2026-06-12",
+      "role": "contributed",
+      "roleClaim": "needs_clarification",
+      "skills": [
+        "executive communication"
+      ],
+      "sources": [
+        "gemini"
+      ],
+      "status": "completed",
+      "supportingFacts": [],
+      "title": "Cedar Valley quarterly business review delivered",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-06-14",
+        "start": "2026-06-08"
+      }
+    },
+    {
+      "action": "Reviewed the failed batches with the customer integration engineer and agreed a remediation checklist.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_47e1c1ce8a94",
+      "datePrecision": "week",
+      "deliverable": "Remediation checklist.",
+      "evidence": [
+        "ex_8096a0bcc051"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "ownership_customer_side"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.455Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_244ff2a1ed04",
+      "kind": "activity",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_3d8d64faf42f",
+      "nextSteps": [
+        "Customer engineering team owns the fix"
+      ],
+      "outcome": null,
+      "outcomeClaim": null,
+      "overridden": false,
+      "problem": "Seven HL7 message batches were failing.",
+      "projectId": "proj_3d8d64faf42f",
+      "reportingPeriod": "Week of 2026-06-19",
+      "role": "contributed",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "integration troubleshooting"
+      ],
+      "sources": [
+        "zoom"
+      ],
+      "status": "in_progress",
+      "supportingFacts": [],
+      "title": "Meridian HL7 batch failure triage",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-06-21",
+        "start": "2026-06-15"
+      }
+    },
+    {
+      "action": "Wrote the healthcare-specific security review section.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "medium",
+      "customerId": null,
+      "datePrecision": "week",
+      "deliverable": "Security review section of the onboarding playbook.",
+      "evidence": [
+        "ex_fa0770b06d58"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.455Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_4f264a1303a5",
+      "kind": "deliverable",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_333d38fbd5b7",
+      "nextSteps": [],
+      "outcome": null,
+      "outcomeClaim": null,
+      "overridden": false,
+      "problem": "The onboarding playbook had no healthcare-specific security review step.",
+      "projectId": "proj_333d38fbd5b7",
+      "reportingPeriod": "Week of 2026-07-03",
+      "role": "contributed",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "healthcare compliance",
+        "technical writing"
+      ],
+      "sources": [
+        "gemini"
+      ],
+      "status": "completed",
+      "supportingFacts": [],
+      "title": "Healthcare security review section of the onboarding playbook",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-07-05",
+        "start": "2026-06-29"
+      }
+    },
+    {
+      "action": "Ran the follow-up session and confirmed the blocking schema change.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_47e1c1ce8a94",
+      "datePrecision": "week",
+      "deliverable": null,
+      "evidence": [
+        "ex_15f813dab190"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.455Z",
+          "change": "created",
+          "importId": "imp001-demo0001"
+        }
+      ],
+      "id": "con_23a3cafa60e7",
+      "kind": "activity",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_3d8d64faf42f",
+      "nextSteps": [
+        "Customer to confirm the schema owner"
+      ],
+      "outcome": "Three of seven failed batches were resolved; four remain blocked on a customer-side schema change.",
+      "outcomeClaim": "stated_in_source",
+      "overridden": false,
+      "problem": "Four of seven failed batches remained unresolved.",
+      "projectId": "proj_3d8d64faf42f",
+      "reportingPeriod": "Week of 2026-07-17",
+      "role": "contributed",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "integration troubleshooting"
+      ],
+      "sources": [
+        "zoom"
+      ],
+      "status": "in_progress",
+      "supportingFacts": [],
+      "title": "Meridian remediation follow-up",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-07-19",
+        "start": "2026-07-13"
+      }
+    },
+    {
+      "action": "Ran the adoption check-in with Northwind operations.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_04e898d0698d",
+      "datePrecision": "week",
+      "deliverable": null,
+      "evidence": [
+        "ex_61f661931fb8"
+      ],
+      "firstSeenImport": "imp002-demo0002",
+      "flags": [],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.464Z",
+          "change": "created",
+          "importId": "imp002-demo0002"
+        }
+      ],
+      "id": "con_35cd7e4e2558",
+      "kind": "activity",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_62fff97dc220",
+      "nextSteps": [],
+      "outcome": "The triage routing workflow is in production for the referral queue. Adoption across the four coordinators was not measured.",
+      "outcomeClaim": "stated_in_source",
+      "overridden": false,
+      "problem": "It was unknown whether the sandbox workflow had moved into production use.",
+      "projectId": "proj_62fff97dc220",
+      "reportingPeriod": "Week of 2026-07-24",
+      "role": "contributed",
+      "roleClaim": "needs_clarification",
+      "skills": [
+        "adoption management"
+      ],
+      "sources": [
+        "gemini"
+      ],
+      "status": "completed",
+      "supportingFacts": [],
+      "title": "Northwind adoption check-in",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-07-26",
+        "start": "2026-07-20"
+      }
+    },
+    {
+      "action": "Co-owned the escalation response with the support lead.",
+      "businessRelevance": "Priority-one escalations are the account team’s highest-severity customer issues.",
+      "businessRelevanceClaim": "interpretation",
+      "confidence": "high",
+      "customerId": "cust_3c98a0d9d3df",
+      "datePrecision": "week",
+      "deliverable": "Escalation response.",
+      "evidence": [
+        "ex_eac68987145a",
+        "ex_4c4d209a6c8a"
+      ],
+      "firstSeenImport": "imp002-demo0002",
+      "flags": [
+        "multi_source_not_verified"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.464Z",
+          "change": "created",
+          "importId": "imp002-demo0002"
+        }
+      ],
+      "id": "con_c6254d3193e2",
+      "kind": "outcome",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_e0eea5c7f008",
+      "nextSteps": [],
+      "outcome": "Two priority-one escalations were closed within the week.",
+      "outcomeClaim": "stated_in_source",
+      "overridden": false,
+      "problem": "Two priority-one escalations were open for Cedar Valley.",
+      "projectId": "proj_e0eea5c7f008",
+      "reportingPeriod": "Week of 2026-08-07",
+      "role": "co_owned",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "escalation management"
+      ],
+      "sources": [
+        "zoom",
+        "gemini"
+      ],
+      "status": "completed",
+      "supportingFacts": [
+        "Source describes the escalations as priority-one.",
+        "Source states both were closed within the week."
+      ],
+      "title": "Cedar Valley priority-one escalation response",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-08-09",
+        "start": "2026-08-03"
+      }
+    },
+    {
+      "action": "Ran the session in which a schema owner was named.",
+      "businessRelevance": null,
+      "businessRelevanceClaim": null,
+      "confidence": "high",
+      "customerId": "cust_47e1c1ce8a94",
+      "datePrecision": "week",
+      "deliverable": null,
+      "evidence": [
+        "ex_6ba7c16750c3"
+      ],
+      "firstSeenImport": "imp002-demo0002",
+      "flags": [
+        "ownership_customer_side"
+      ],
+      "history": [
+        {
+          "at": "2026-09-20T19:00:57.464Z",
+          "change": "created",
+          "importId": "imp002-demo0002"
+        }
+      ],
+      "id": "con_ba099c909a96",
+      "kind": "activity",
+      "lastSeenImport": "imp002-demo0002",
+      "lessons": [],
+      "mergedFrom": [],
+      "milestoneOf": "proj_3d8d64faf42f",
+      "nextSteps": [],
+      "outcome": "A schema owner was named and the remaining four failed batches were resolved. Customer engineering executed the change.",
+      "outcomeClaim": "stated_in_source",
+      "overridden": false,
+      "problem": "Four failed batches were blocked on an unassigned schema change.",
+      "projectId": "proj_3d8d64faf42f",
+      "reportingPeriod": "Week of 2026-09-04",
+      "role": "contributed",
+      "roleClaim": "stated_in_source",
+      "skills": [
+        "stakeholder management"
+      ],
+      "sources": [
+        "zoom"
+      ],
+      "status": "completed",
+      "supportingFacts": [],
+      "title": "Meridian schema owner session and remediation close-out",
+      "workDate": null,
+      "workWeek": {
+        "end": "2026-09-06",
+        "start": "2026-08-31"
+      }
+    }
+  ],
+  "coverage": {
+    "declaredStart": "2026-05-01",
+    "documentedWeekCount": 18,
+    "months": [
+      {
+        "comparable": false,
+        "label": "4 of 5 weeks documented - partial",
+        "month": "2026-05",
+        "status": "partial",
+        "weeksDocumented": 4,
+        "weeksExpected": 5
+      },
+      {
+        "comparable": true,
+        "label": "5 of 5 weeks documented",
+        "month": "2026-06",
+        "status": "complete",
+        "weeksDocumented": 5,
+        "weeksExpected": 5
+      },
+      {
+        "comparable": false,
+        "label": "4 of 5 weeks documented - partial",
+        "month": "2026-07",
+        "status": "partial",
+        "weeksDocumented": 4,
+        "weeksExpected": 5
+      },
+      {
+        "comparable": true,
+        "label": "6 of 6 weeks documented",
+        "month": "2026-08",
+        "status": "complete",
+        "weeksDocumented": 6,
+        "weeksExpected": 6
+      },
+      {
+        "comparable": false,
+        "label": "2 of 5 weeks documented - partial",
+        "month": "2026-09",
+        "status": "partial",
+        "weeksDocumented": 2,
+        "weeksExpected": 5
+      }
+    ],
+    "notes": [
+      "Coverage is measured from weekly entries found in the source document.",
+      "A month marked \"partial\" is not directly comparable with a complete month.",
+      "Missing documentation is not evidence that no work happened."
+    ],
+    "sourceEnd": "2026-09-11",
+    "sourceStart": "2026-05-08"
+  },
+  "customers": [
+    {
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "cust_04e898d0698d",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "Northwind Regional Health (demo)"
+    },
+    {
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "cust_3c98a0d9d3df",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "Cedar Valley Clinics (demo)"
+    },
+    {
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "cust_47e1c1ce8a94",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "Meridian Health Partners (demo)"
+    }
+  ],
+  "datasetVersion": 2,
+  "demoNotice": "SYNTHETIC DEMONSTRATION DATA. Every customer, project, date, quote and number below was invented to show how the dashboard behaves. It is stored separately from your real history and is never merged into it.",
+  "excerpts": [
+    {
+      "contentHash": "efb337ef69edb958",
+      "id": "ex_ca975719e1ed",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 5,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 3
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-05-08",
+      "sectionId": "s003",
+      "sourceLabel": "gemini",
+      "text": "Week of May 8: Ran the intake triage discovery session with Northwind Regional Health. Mapped the current referral queue and identified three handoff points that were causing rework."
+    },
+    {
+      "contentHash": "0e7781eb9d110c25",
+      "id": "ex_209fb7523dd7",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 5,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 3
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-05-08",
+      "sectionId": "s003",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI summary - Northwind intake discovery (May 8). Participants walked through the referral queue. The TSM documented three handoff points causing rework and agreed to draft a proposed triage flow."
+    },
+    {
+      "contentHash": "8395717af7a5f444",
+      "id": "ex_de9f4353bfa1",
+      "importId": "imp001-demo0001",
+      "importVersion": 1,
+      "lastSeenImport": "imp001-demo0001",
+      "page": 6,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-07.pdf",
+      "reportingPeriod": "2026-05-15",
+      "sectionId": "s006",
+      "sourceLabel": "gemini",
+      "text": "Week of May 15: Drafted and shared the proposed triage flow with the Northwind operations lead. Discussed automating follow-up reminders; no decision was made."
+    },
+    {
+      "contentHash": "5b3642d8621f377e",
+      "id": "ex_d6d6e5f72125",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 11,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 9
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-05-22",
+      "sectionId": "s009",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI - Northwind working session (May 22). Customer noted they handle approximately 200,000 inbound calls per month across their contact centre."
+    },
+    {
+      "contentHash": "9f7b52870f5e5dfb",
+      "id": "ex_8b97573d2619",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 13,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 11
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-05-29",
+      "sectionId": "s011",
+      "sourceLabel": "gemini",
+      "text": "Week of May 29: Built and deployed the triage routing workflow in the customer sandbox. Northwind operations estimated it saves about two hours per week for each of the four intake coordinators."
+    },
+    {
+      "contentHash": "3d5a5210e73ef290",
+      "id": "ex_481c4eab2a6c",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 16,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 14
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-06-05",
+      "sectionId": "s014",
+      "sourceLabel": "gemini",
+      "text": "Week of June 5: Led the Cedar Valley QBR preparation. Assembled the usage narrative and the renewal risk summary for the account team."
+    },
+    {
+      "contentHash": "bfde07af43db3c57",
+      "id": "ex_261a0ab10920",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 18,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 16
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-06-05",
+      "sectionId": "s016",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI - Cedar Valley QBR prep (June 5). The TSM led the working session, presented the usage narrative and walked the account team through renewal risks."
+    },
+    {
+      "contentHash": "2a99751a3f427f3d",
+      "id": "ex_abc8b8e1bed2",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 21,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 19
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-06-12",
+      "sectionId": "s019",
+      "sourceLabel": "gemini",
+      "text": "Week of June 12: Delivered the Cedar Valley quarterly business review. Customer confirmed the adoption plan for the next quarter."
+    },
+    {
+      "contentHash": "2b118b79ef9d80a4",
+      "id": "ex_8096a0bcc051",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 24,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 22
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-06-19",
+      "sectionId": "s022",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI - Meridian integration triage (June 19). Reviewed 7 failed HL7 message batches with the customer integration engineer. Agreed a remediation checklist. Ownership of the fix stayed with the customer engineering team."
+    },
+    {
+      "contentHash": "587bc9f518bbbbbc",
+      "id": "ex_02612c37d875",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 27,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 25
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-06-26",
+      "sectionId": "s025",
+      "sourceLabel": "gemini",
+      "text": "Week of June 26: The triage routing workflow reduced repeat handoffs on the Northwind referral queue. Operations reported the workflow now saves about two hours per week per coordinator."
+    },
+    {
+      "contentHash": "b5fdeaf75c583690",
+      "id": "ex_fa0770b06d58",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 30,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 28
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-07-03",
+      "sectionId": "s028",
+      "sourceLabel": "gemini",
+      "text": "Week of July 3: Contributed to the onboarding playbook refresh. Wrote the healthcare-specific security review section. Target is a first response within 24 hours for new accounts."
+    },
+    {
+      "contentHash": "82ca82032ec2b8b0",
+      "id": "ex_15f813dab190",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 33,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 31
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-07-17",
+      "sectionId": "s031",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI - Meridian follow-up (July 17). Three of the seven failed batches were resolved. Remaining four are blocked on a customer-side schema change. Next step: customer to confirm schema owner."
+    },
+    {
+      "contentHash": "def526e84d1f6ba2",
+      "id": "ex_31c100cc2caa",
+      "importId": "imp001-demo0001",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 35,
+      "pageHistory": [
+        {
+          "importVersion": 1,
+          "page": 33
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-07-17",
+      "sectionId": "s033",
+      "sourceLabel": "gemini",
+      "text": "Week of July 17: Learning - pushing a remediation plan without a named owner on the customer side stalls the work. Applied this by asking for a named schema owner before the next Meridian session."
+    },
+    {
+      "contentHash": "b990b5b449d86cb1",
+      "id": "ex_61f661931fb8",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 36,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-07-24",
+      "sectionId": "s036",
+      "sourceLabel": "gemini",
+      "text": "Week of July 24: Ran the Northwind adoption check-in. The triage routing workflow is now in production for the referral queue. Adoption across the four coordinators was not measured."
+    },
+    {
+      "contentHash": "a38e9338951150b4",
+      "id": "ex_eac68987145a",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 38,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-08-07",
+      "sectionId": "s038",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI - Cedar Valley escalation review (August 7). The TSM co-owned the escalation response with the support lead. Two priority-one escalations were closed within the week."
+    },
+    {
+      "contentHash": "b7fea61e15aca3bf",
+      "id": "ex_4c4d209a6c8a",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 41,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-08-14",
+      "sectionId": "s041",
+      "sourceLabel": "gemini",
+      "text": "Week of August 14: Closed two priority-one escalations for Cedar Valley alongside the support lead."
+    },
+    {
+      "contentHash": "3271f46ecef0c62f",
+      "id": "ex_b6d8e7e651ec",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 43,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-08-21",
+      "sectionId": "s043",
+      "sourceLabel": "gemini",
+      "text": "Week of August 21: Northwind operations now report the triage workflow saves about three hours per week per coordinator following the production rollout."
+    },
+    {
+      "contentHash": "cebdda7973c28486",
+      "id": "ex_6ba7c16750c3",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 47,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-09-04",
+      "sectionId": "s047",
+      "sourceLabel": "zoom",
+      "text": "Zoom AI - Meridian schema owner session (September 4). A schema owner was named. The remaining four failed batches were resolved. Customer engineering executed the change."
+    },
+    {
+      "contentHash": "183b3f108abdff5e",
+      "id": "ex_71dd5dc635b0",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 45,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-08-28",
+      "sectionId": "s045",
+      "sourceLabel": "gemini",
+      "text": "Week of August 28: Cedar Valley mentioned a 15% improvement during the check-in. The summary does not say what was measured or over what period."
+    },
+    {
+      "contentHash": "cff3b594e9654417",
+      "id": "ex_0b8ed4d35f13",
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "lastSeenImport": "imp002-demo0002",
+      "page": 49,
+      "pageHistory": [],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "reportingPeriod": "2026-09-11",
+      "sectionId": "s049",
+      "sourceLabel": "gemini",
+      "text": "Week of September 11: Learning - asking for a named owner up front unblocked the Meridian remediation. Applied the same approach to the Cedar Valley escalation process."
+    }
+  ],
+  "gaps": [
+    {
+      "contributionId": "con_40daf3382d27",
+      "message": "Implementation recorded; no result is documented in the source.",
+      "title": "Proposed triage flow shared with Northwind operations",
+      "type": "outcome_not_documented"
+    },
+    {
+      "contributionId": "con_5b1c1b0e12a2",
+      "message": "Discussed in the source; no record of it being implemented.",
+      "title": "Automating follow-up reminders (discussed only)",
+      "type": "proposal_not_followed_up"
+    },
+    {
+      "contributionId": "con_5cf722061aa4",
+      "message": "An outcome is described, but the only numbers attached are reported estimates - no measured result.",
+      "title": "Triage routing workflow deployed to Northwind sandbox",
+      "type": "outcome_not_measured"
+    },
+    {
+      "contributionId": "con_7366d953b5c0",
+      "message": "Implementation recorded; no result is documented in the source.",
+      "title": "Cedar Valley QBR preparation",
+      "type": "outcome_not_documented"
+    },
+    {
+      "contributionId": "con_5b1e4992db78",
+      "message": "An outcome is described in words; no number is recorded for it.",
+      "title": "Cedar Valley quarterly business review delivered",
+      "type": "outcome_not_measured"
+    },
+    {
+      "contributionId": "con_244ff2a1ed04",
+      "message": "Documented next step, with no later update in the source: Customer engineering team owns the fix",
+      "title": "Meridian HL7 batch failure triage",
+      "type": "next_step_open"
+    },
+    {
+      "contributionId": "con_4f264a1303a5",
+      "message": "Implementation recorded; no result is documented in the source.",
+      "title": "Healthcare security review section of the onboarding playbook",
+      "type": "outcome_not_documented"
+    },
+    {
+      "contributionId": "con_23a3cafa60e7",
+      "message": "Documented next step, with no later update in the source: Customer to confirm the schema owner",
+      "title": "Meridian remediation follow-up",
+      "type": "next_step_open"
+    },
+    {
+      "contributionId": "con_35cd7e4e2558",
+      "message": "An outcome is described in words; no number is recorded for it.",
+      "title": "Northwind adoption check-in",
+      "type": "outcome_not_measured"
+    }
+  ],
+  "generatedAt": "2026-09-20T19:00:57.451Z",
+  "imports": [],
+  "lastSuccessfulRefresh": "2026-09-20T19:00:57.469Z",
+  "learnings": [
+    {
+      "appliedIn": [
+        "proj_3d8d64faf42f",
+        "proj_e0eea5c7f008"
+      ],
+      "claim": "stated_in_source",
+      "evidence": [
+        "ex_31c100cc2caa",
+        "ex_0b8ed4d35f13"
+      ],
+      "examples": [
+        "Meridian HL7 remediation stalled on an unassigned schema change.",
+        "Applied the same approach to the Cedar Valley escalation process."
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "id": "lrn_2bd4ad7d805e",
+      "lastSeenImport": "imp002-demo0002",
+      "sources": [
+        "gemini"
+      ],
+      "summary": "Remediation work stalls when no named owner exists on the customer side.",
+      "theme": "Name the owner before agreeing a remediation plan"
+    },
+    {
+      "appliedIn": [
+        "proj_62fff97dc220"
+      ],
+      "claim": "interpretation",
+      "evidence": [
+        "ex_ca975719e1ed"
+      ],
+      "examples": [
+        "Northwind intake discovery produced the handoff map the triage flow was built on."
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "id": "lrn_77040192bf2a",
+      "lastSeenImport": "imp002-demo0002",
+      "sources": [
+        "gemini"
+      ],
+      "summary": "Mapping the referral queue first made the triage design concrete.",
+      "theme": "Baseline the process before proposing automation"
+    }
+  ],
+  "metrics": [
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": null,
+      "claim": "stated_in_source",
+      "contributionId": null,
+      "customerId": "cust_04e898d0698d",
+      "evidence": [
+        "ex_d6d6e5f72125"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [],
+      "id": "met_f5d04f7c4f95",
+      "kind": "context",
+      "label": "Inbound calls handled by the customer contact centre",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Total inbound call volume across the customer contact centre",
+      "overridden": false,
+      "owner": "customer",
+      "period": "per month",
+      "projectId": null,
+      "repeatOf": null,
+      "scope": "Northwind's contact centre",
+      "sources": [
+        "zoom"
+      ],
+      "unit": "calls",
+      "value": 200000,
+      "valueText": null
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": null,
+      "claim": "stated_in_source",
+      "contributionId": "con_5cf722061aa4",
+      "customerId": "cust_04e898d0698d",
+      "evidence": [
+        "ex_8b97573d2619",
+        "ex_02612c37d875"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "estimate_not_measured",
+        "conflict"
+      ],
+      "id": "met_da5354331bfe",
+      "kind": "estimate",
+      "label": "Time saved per intake coordinator",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Operations’ estimate of manual time avoided by the triage routing workflow",
+      "overridden": false,
+      "owner": "customer",
+      "period": "per week",
+      "projectId": "proj_62fff97dc220",
+      "repeatOf": null,
+      "scope": "Each of four Northwind intake coordinators",
+      "sources": [
+        "gemini"
+      ],
+      "unit": "hours per week",
+      "value": 2,
+      "valueText": "about two hours"
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": null,
+      "claim": "stated_in_source",
+      "contributionId": null,
+      "customerId": "cust_04e898d0698d",
+      "evidence": [
+        "ex_02612c37d875"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "restatement"
+      ],
+      "id": "met_e774ba10e4f1",
+      "kind": "estimate",
+      "label": "Time saved per intake coordinator",
+      "lastSeenImport": "imp001-demo0001",
+      "measures": "Operations’ estimate of manual time avoided by the triage routing workflow",
+      "overridden": false,
+      "owner": "customer",
+      "period": "per week",
+      "projectId": "proj_62fff97dc220",
+      "repeatOf": "met_da5354331bfe",
+      "scope": "Each of four Northwind intake coordinators",
+      "sources": [
+        "gemini"
+      ],
+      "unit": "hours per week",
+      "value": 2,
+      "valueText": "about two hours"
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": null,
+      "claim": "stated_in_source",
+      "contributionId": null,
+      "customerId": "cust_47e1c1ce8a94",
+      "evidence": [
+        "ex_8096a0bcc051"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [],
+      "id": "met_08d10262a53a",
+      "kind": "context",
+      "label": "HL7 message batches failing",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Count of message batches in a failed state at the time of the triage session",
+      "overridden": false,
+      "owner": "customer",
+      "period": "as at 2026-06-19",
+      "projectId": "proj_3d8d64faf42f",
+      "repeatOf": null,
+      "scope": "Meridian HL7 interface",
+      "sources": [
+        "zoom"
+      ],
+      "unit": "batches",
+      "value": 7,
+      "valueText": null
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": "7 failing batches as at 2026-06-19",
+      "claim": "stated_in_source",
+      "contributionId": "con_23a3cafa60e7",
+      "customerId": "cust_47e1c1ce8a94",
+      "evidence": [
+        "ex_15f813dab190"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [
+        "ownership_customer_side"
+      ],
+      "id": "met_4683736c49c2",
+      "kind": "achieved",
+      "label": "HL7 batch failures resolved",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Count of the original seven failed batches confirmed resolved",
+      "overridden": false,
+      "owner": "team",
+      "period": "by 2026-07-17",
+      "projectId": "proj_3d8d64faf42f",
+      "repeatOf": null,
+      "scope": "Meridian HL7 interface, initial set of 7 failed batches",
+      "sources": [
+        "zoom"
+      ],
+      "unit": "batches",
+      "value": 3,
+      "valueText": null
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": null,
+      "claim": "stated_in_source",
+      "contributionId": "con_4f264a1303a5",
+      "customerId": null,
+      "evidence": [
+        "ex_fa0770b06d58"
+      ],
+      "firstSeenImport": "imp001-demo0001",
+      "flags": [],
+      "id": "met_a8a688590e06",
+      "kind": "target",
+      "label": "First response time for new accounts",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Target maximum time to first response",
+      "overridden": false,
+      "owner": "team",
+      "period": "per new account",
+      "projectId": "proj_333d38fbd5b7",
+      "repeatOf": null,
+      "scope": "New accounts in the onboarding playbook",
+      "sources": [
+        "gemini"
+      ],
+      "unit": "hours",
+      "value": 24,
+      "valueText": null
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": null,
+      "claim": "needs_clarification",
+      "contributionId": null,
+      "customerId": "cust_3c98a0d9d3df",
+      "evidence": [
+        "ex_71dd5dc635b0"
+      ],
+      "firstSeenImport": "imp002-demo0002",
+      "flags": [
+        "unspecified_measure"
+      ],
+      "id": "met_59020d0cfe78",
+      "kind": "context",
+      "label": "Unspecified improvement reported by Cedar Valley",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": null,
+      "overridden": false,
+      "owner": "unknown",
+      "period": null,
+      "projectId": null,
+      "repeatOf": null,
+      "scope": null,
+      "sources": [
+        "gemini"
+      ],
+      "unit": "percent",
+      "value": 15,
+      "valueText": null
+    },
+    {
+      "aggregatable": true,
+      "aggregationGroup": "p1_escalations_closed",
+      "baseline": null,
+      "claim": "stated_in_source",
+      "contributionId": "con_c6254d3193e2",
+      "customerId": "cust_3c98a0d9d3df",
+      "evidence": [
+        "ex_eac68987145a",
+        "ex_4c4d209a6c8a"
+      ],
+      "firstSeenImport": "imp002-demo0002",
+      "flags": [],
+      "id": "met_b7b7fe349cca",
+      "kind": "achieved",
+      "label": "Priority-one escalations closed",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Count of priority-one escalations closed in the week",
+      "overridden": false,
+      "owner": "team",
+      "period": "week of 2026-08-07",
+      "projectId": "proj_e0eea5c7f008",
+      "repeatOf": null,
+      "scope": "Cedar Valley priority-one queue",
+      "sources": [
+        "zoom",
+        "gemini"
+      ],
+      "unit": "escalations",
+      "value": 2,
+      "valueText": null
+    },
+    {
+      "aggregatable": false,
+      "aggregationGroup": null,
+      "baseline": "4 batches still failing as at 2026-07-17",
+      "claim": "stated_in_source",
+      "contributionId": "con_ba099c909a96",
+      "customerId": "cust_47e1c1ce8a94",
+      "evidence": [
+        "ex_6ba7c16750c3"
+      ],
+      "firstSeenImport": "imp002-demo0002",
+      "flags": [
+        "ownership_customer_side"
+      ],
+      "id": "met_28ffccaeb0c8",
+      "kind": "achieved",
+      "label": "HL7 batch failures resolved",
+      "lastSeenImport": "imp002-demo0002",
+      "measures": "Count of the remaining four failed batches confirmed resolved",
+      "overridden": false,
+      "owner": "customer",
+      "period": "by 2026-09-04",
+      "projectId": "proj_3d8d64faf42f",
+      "repeatOf": null,
+      "scope": "Meridian HL7 interface, remaining 4 of the initial 7 failed batches",
+      "sources": [
+        "zoom"
+      ],
+      "unit": "batches",
+      "value": 4,
+      "valueText": null
+    }
+  ],
+  "mode": "demo",
+  "projects": [
+    {
+      "customerId": "cust_04e898d0698d",
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "proj_62fff97dc220",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "Intake triage automation"
+    },
+    {
+      "customerId": "cust_3c98a0d9d3df",
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "proj_e0eea5c7f008",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "Quarterly business review programme"
+    },
+    {
+      "customerId": "cust_47e1c1ce8a94",
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "proj_3d8d64faf42f",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "EHR integration remediation"
+    },
+    {
+      "customerId": null,
+      "description": null,
+      "firstSeenImport": "imp001-demo0001",
+      "id": "proj_333d38fbd5b7",
+      "lastSeenImport": "imp002-demo0002",
+      "name": "Onboarding playbook refresh"
+    }
+  ],
+  "refreshReports": [
+    {
+      "at": "2026-09-20T19:00:57.465Z",
+      "changedMetrics": [
+        {
+          "from": 2,
+          "id": "met_da5354331bfe",
+          "label": "Time saved per intake coordinator",
+          "to": 3
+        }
+      ],
+      "datesCovered": {
+        "end": "2026-09-11",
+        "start": "2026-05-08"
+      },
+      "importId": "imp002-demo0002",
+      "importVersion": 2,
+      "mergedDuplicates": [
+        {
+          "id": "con_c6254d3193e2",
+          "matchScore": 1,
+          "note": "Gemini and Zoom describe the same event. Both excerpts are kept; agreement between two AI summaries is not independent verification.",
+          "reason": "analysis merged overlapping summaries of the same event",
+          "sources": [
+            "zoom",
+            "gemini"
+          ],
+          "title": "Cedar Valley priority-one escalation response"
+        }
+      ],
+      "missingFromExport": [
+        {
+          "id": "con_40daf3382d27",
+          "lastSeenImport": "imp001-demo0001",
+          "note": "Flagged, not deleted. Confirm whether it was edited out of the document on purpose.",
+          "title": "Proposed triage flow shared with Northwind operations"
+        },
+        {
+          "id": "con_5b1c1b0e12a2",
+          "lastSeenImport": "imp001-demo0001",
+          "note": "Flagged, not deleted. Confirm whether it was edited out of the document on purpose.",
+          "title": "Automating follow-up reminders (discussed only)"
+        }
+      ],
+      "newContributions": [
+        {
+          "id": "con_35cd7e4e2558",
+          "status": "completed",
+          "title": "Northwind adoption check-in"
+        },
+        {
+          "id": "con_c6254d3193e2",
+          "status": "completed",
+          "title": "Cedar Valley priority-one escalation response"
+        },
+        {
+          "id": "con_ba099c909a96",
+          "status": "completed",
+          "title": "Meridian schema owner session and remediation close-out"
+        }
+      ],
+      "newMetrics": [
+        {
+          "id": "met_59020d0cfe78",
+          "kind": "context",
+          "label": "Unspecified improvement reported by Cedar Valley",
+          "value": 15
+        },
+        {
+          "id": "met_b7b7fe349cca",
+          "kind": "achieved",
+          "label": "Priority-one escalations closed",
+          "value": 2
+        },
+        {
+          "id": "met_28ffccaeb0c8",
+          "kind": "achieved",
+          "label": "HL7 batch failures resolved",
+          "value": 4
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-09.pdf",
+      "repaginated": [
+        {
+          "excerptId": "ex_ca975719e1ed",
+          "from": 3,
+          "to": 5
+        },
+        {
+          "excerptId": "ex_209fb7523dd7",
+          "from": 3,
+          "to": 5
+        },
+        {
+          "excerptId": "ex_d6d6e5f72125",
+          "from": 9,
+          "to": 11
+        },
+        {
+          "excerptId": "ex_8b97573d2619",
+          "from": 11,
+          "to": 13
+        },
+        {
+          "excerptId": "ex_481c4eab2a6c",
+          "from": 14,
+          "to": 16
+        },
+        {
+          "excerptId": "ex_261a0ab10920",
+          "from": 16,
+          "to": 18
+        },
+        {
+          "excerptId": "ex_abc8b8e1bed2",
+          "from": 19,
+          "to": 21
+        },
+        {
+          "excerptId": "ex_8096a0bcc051",
+          "from": 22,
+          "to": 24
+        },
+        {
+          "excerptId": "ex_02612c37d875",
+          "from": 25,
+          "to": 27
+        },
+        {
+          "excerptId": "ex_fa0770b06d58",
+          "from": 28,
+          "to": 30
+        },
+        {
+          "excerptId": "ex_15f813dab190",
+          "from": 31,
+          "to": 33
+        },
+        {
+          "excerptId": "ex_31c100cc2caa",
+          "from": 33,
+          "to": 35
+        }
+      ],
+      "repeatedMetrics": [],
+      "text": "Refresh report - DEMO_professional_development_2026-09.pdf\nImport imp002-demo0002 · dataset version 2\n\n── Dates covered by this source ──────────────────────────────\n   2026-05-08 → 2026-09-11  (18 weekly entries found)\n   Partial months: 2026-05 (4/5), 2026-07 (4/5), 2026-09 (2/5)\n\n── New contributions (3) ─────────────────────────────────────\n   + Northwind adoption check-in  [completed]\n   + Cedar Valley priority-one escalation response  [completed]\n   + Meridian schema owner session and remediation close-out  [completed]\n\n── Updated contributions (0) ─────────────────────────────────\n   (none)\n\n── Merged duplicates (1) ─────────────────────────────────────\n   = Cedar Valley priority-one escalation response  [zoom + gemini] analysis merged overlapping summaries of the same event\n\n── Changed metrics (1) ───────────────────────────────────────\n   ! Time saved per intake coordinator: 2 → 3\n\n── Repeated metrics counted once (0) ─────────────────────────\n   (none)\n\n── Unresolved conflicts (1) ──────────────────────────────────\n   ? metric_value_conflict: Time saved per intake coordinator\n\n── Previously recorded, absent from this export (2) ──────────\n   … Proposed triage flow shared with Northwind operations (last seen imp001-demo0001)\n   … Automating follow-up reminders (discussed only) (last seen imp001-demo0001)\n\n── Re-paginated excerpts (12) ────────────────────────────────\n   p3 → p5  ex_ca975719e1ed\n   p3 → p5  ex_209fb7523dd7\n   p9 → p11  ex_d6d6e5f72125\n   p11 → p13  ex_8b97573d2619\n   p14 → p16  ex_481c4eab2a6c\n   p16 → p18  ex_261a0ab10920\n   p19 → p21  ex_abc8b8e1bed2\n   p22 → p24  ex_8096a0bcc051\n   p25 → p27  ex_02612c37d875\n   p28 → p30  ex_fa0770b06d58\n   … and 2 more\n\n── Unreadable / OCR-needed sections (1) ──────────────────────\n   × s062 (pages 44-45): scanned insert, no text layer - needs OCR\n\n── Sections left unresolved by analysis (0) ──────────────────\n   (none)\n",
+      "unreadableSections": [
+        "s062 (pages 44-45): scanned insert, no text layer - needs OCR"
+      ],
+      "unresolvedConflicts": [
+        {
+          "detectedAt": "2026-09-20T19:00:57.464Z",
+          "existing": {
+            "evidence": [
+              "ex_8b97573d2619",
+              "ex_02612c37d875"
+            ],
+            "period": "per week",
+            "unit": "hours per week",
+            "value": 2,
+            "valueText": "about two hours"
+          },
+          "importId": "imp002-demo0002",
+          "incoming": {
+            "evidence": [
+              "ex_b6d8e7e651ec"
+            ],
+            "period": "per week",
+            "unit": "hours per week",
+            "value": 3,
+            "valueText": "about three hours"
+          },
+          "label": "Time saved per intake coordinator",
+          "metricId": "met_da5354331bfe",
+          "resolution": "unresolved",
+          "type": "metric_value_conflict"
+        }
+      ],
+      "unresolvedSections": [],
+      "updatedContributions": []
+    },
+    {
+      "at": "2026-09-20T19:00:57.458Z",
+      "changedMetrics": [],
+      "datesCovered": {
+        "end": "2026-07-17",
+        "start": "2026-05-08"
+      },
+      "importId": "imp001-demo0001",
+      "importVersion": 1,
+      "mergedDuplicates": [
+        {
+          "id": "con_9a1db7e55feb",
+          "matchScore": 1,
+          "note": "Gemini and Zoom describe the same event. Both excerpts are kept; agreement between two AI summaries is not independent verification.",
+          "reason": "analysis merged overlapping summaries of the same event",
+          "sources": [
+            "gemini",
+            "zoom"
+          ],
+          "title": "Intake triage discovery session with Northwind"
+        },
+        {
+          "id": "con_7366d953b5c0",
+          "matchScore": 1,
+          "note": "Gemini and Zoom describe the same event. Both excerpts are kept; agreement between two AI summaries is not independent verification.",
+          "reason": "analysis merged overlapping summaries of the same event",
+          "sources": [
+            "gemini",
+            "zoom"
+          ],
+          "title": "Cedar Valley QBR preparation"
+        }
+      ],
+      "missingFromExport": [],
+      "newContributions": [
+        {
+          "id": "con_9a1db7e55feb",
+          "status": "completed",
+          "title": "Intake triage discovery session with Northwind"
+        },
+        {
+          "id": "con_40daf3382d27",
+          "status": "completed",
+          "title": "Proposed triage flow shared with Northwind operations"
+        },
+        {
+          "id": "con_5b1c1b0e12a2",
+          "status": "proposed",
+          "title": "Automating follow-up reminders (discussed only)"
+        },
+        {
+          "id": "con_5cf722061aa4",
+          "status": "completed",
+          "title": "Triage routing workflow deployed to Northwind sandbox"
+        },
+        {
+          "id": "con_7366d953b5c0",
+          "status": "completed",
+          "title": "Cedar Valley QBR preparation"
+        },
+        {
+          "id": "con_5b1e4992db78",
+          "status": "completed",
+          "title": "Cedar Valley quarterly business review delivered"
+        },
+        {
+          "id": "con_244ff2a1ed04",
+          "status": "in_progress",
+          "title": "Meridian HL7 batch failure triage"
+        },
+        {
+          "id": "con_4f264a1303a5",
+          "status": "completed",
+          "title": "Healthcare security review section of the onboarding playbook"
+        },
+        {
+          "id": "con_23a3cafa60e7",
+          "status": "in_progress",
+          "title": "Meridian remediation follow-up"
+        }
+      ],
+      "newMetrics": [
+        {
+          "id": "met_f5d04f7c4f95",
+          "kind": "context",
+          "label": "Inbound calls handled by the customer contact centre",
+          "value": 200000
+        },
+        {
+          "id": "met_da5354331bfe",
+          "kind": "estimate",
+          "label": "Time saved per intake coordinator",
+          "value": 2
+        },
+        {
+          "id": "met_08d10262a53a",
+          "kind": "context",
+          "label": "HL7 message batches failing",
+          "value": 7
+        },
+        {
+          "id": "met_4683736c49c2",
+          "kind": "achieved",
+          "label": "HL7 batch failures resolved",
+          "value": 3
+        },
+        {
+          "id": "met_a8a688590e06",
+          "kind": "target",
+          "label": "First response time for new accounts",
+          "value": 24
+        }
+      ],
+      "pdfFileName": "DEMO_professional_development_2026-07.pdf",
+      "repaginated": [],
+      "repeatedMetrics": [
+        {
+          "id": "met_da5354331bfe",
+          "label": "Time saved per intake coordinator",
+          "note": "Restated elsewhere in the document. Counted once; the restatement adds nothing to any total.",
+          "repeatId": "met_e774ba10e4f1"
+        }
+      ],
+      "text": "Refresh report - DEMO_professional_development_2026-07.pdf\nImport imp001-demo0001 · dataset version 1\n\n── Dates covered by this source ──────────────────────────────\n   2026-05-08 → 2026-07-17  (10 weekly entries found)\n   Partial months: 2026-05 (4/5), 2026-07 (2/5)\n\n── New contributions (9) ─────────────────────────────────────\n   + Intake triage discovery session with Northwind  [completed]\n   + Proposed triage flow shared with Northwind operations  [completed]\n   + Automating follow-up reminders (discussed only)  [proposed]\n   + Triage routing workflow deployed to Northwind sandbox  [completed]\n   + Cedar Valley QBR preparation  [completed]\n   + Cedar Valley quarterly business review delivered  [completed]\n   + Meridian HL7 batch failure triage  [in_progress]\n   + Healthcare security review section of the onboarding playbook  [completed]\n   + Meridian remediation follow-up  [in_progress]\n\n── Updated contributions (0) ─────────────────────────────────\n   (none)\n\n── Merged duplicates (2) ─────────────────────────────────────\n   = Intake triage discovery session with Northwind  [gemini + zoom] analysis merged overlapping summaries of the same event\n   = Cedar Valley QBR preparation  [gemini + zoom] analysis merged overlapping summaries of the same event\n\n── Changed metrics (0) ───────────────────────────────────────\n   (none)\n\n── Repeated metrics counted once (1) ─────────────────────────\n   · Time saved per intake coordinator\n\n── Unresolved conflicts (0) ──────────────────────────────────\n   (none)\n\n── Previously recorded, absent from this export (0) ──────────\n   (none)\n\n── Re-paginated excerpts (0) ─────────────────────────────────\n   (none)\n\n── Unreadable / OCR-needed sections (0) ──────────────────────\n   (none)\n\n── Sections left unresolved by analysis (1) ──────────────────\n   ? s041: two bullet lines ran together in the export; wording is ambiguous\n",
+      "unreadableSections": [],
+      "unresolvedConflicts": [],
+      "unresolvedSections": [
+        "s041: two bullet lines ran together in the export; wording is ambiguous"
+      ],
+      "updatedContributions": []
+    }
+  ],
+  "schemaVersion": 1,
+  "validation": {
+    "checkedAt": "2026-09-20T19:00:57.469Z",
+    "errors": [],
+    "warnings": [
+      {
+        "code": "metric.no_measures",
+        "message": "met_59020d0cfe78 does not say what the number measures",
+        "ref": "met_59020d0cfe78"
+      },
+      {
+        "code": "metric.owner_unknown",
+        "message": "met_59020d0cfe78 does not say whose metric this is",
+        "ref": "met_59020d0cfe78"
+      }
+    ]
+  }
+}

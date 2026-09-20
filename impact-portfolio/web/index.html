@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Professional Impact Portfolio</title>
+<meta name="description" content="Local, evidence-linked view of documented professional contributions.">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>%F0%9F%93%8B</text></svg>">
+</head>
+<body>
+
+<div id="demo-band" class="band band--demo no-print" hidden>
+  <strong>Synthetic demo</strong>
+  <span id="demo-band-text">Invented data. Stored separately; never merged into your real history.</span>
+  <button class="btn btn--ghost" id="exit-demo" type="button">Leave demo</button>
+</div>
+
+<header class="app no-print">
+  <div class="wrap">
+    <div class="head-row">
+      <div class="brand">Professional Impact Portfolio
+        <span id="refresh-line">No data loaded</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn" id="theme-toggle" type="button" aria-label="Switch colour theme">Theme</button>
+        <button class="btn" id="pattern-toggle" type="button" aria-pressed="false">Patterns off</button>
+        <button class="btn" id="print-btn" type="button">Print</button>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <button data-view="overview" aria-current="page">Overview</button>
+      <button data-view="impact">Impact &amp; metrics</button>
+      <button data-view="initiatives">Customers, projects &amp; development</button>
+      <button data-view="review">Review-ready summaries</button>
+      <button data-view="data">Data &amp; refresh</button>
+    </nav>
+  </div>
+</header>
+
+<section class="filters no-print" id="filters" hidden>
+  <div class="wrap">
+    <div class="filter-row">
+      <div class="field">
+        <label for="f-period">Period</label>
+        <select id="f-period">
+          <option value="all">All time</option>
+          <option value="ytd">Year to date</option>
+          <option value="quarter">Latest quarter</option>
+          <option value="month">Latest month</option>
+          <option value="custom">Custom range…</option>
+        </select>
+      </div>
+      <div class="field" id="custom-range" hidden>
+        <label for="f-from">From</label>
+        <input type="date" id="f-from">
+      </div>
+      <div class="field" id="custom-range-to" hidden>
+        <label for="f-to">To</label>
+        <input type="date" id="f-to">
+      </div>
+      <div class="field">
+        <label for="f-customer">Customer</label>
+        <select id="f-customer"><option value="">All customers</option></select>
+      </div>
+      <div class="field">
+        <label for="f-project">Project</label>
+        <select id="f-project"><option value="">All projects</option></select>
+      </div>
+      <div class="field" style="flex:1 1 220px">
+        <label for="f-search">Search</label>
+        <input type="search" id="f-search" placeholder="Problem, action, outcome, skill, customer…">
+      </div>
+      <button class="btn" id="f-reset" type="button">Reset</button>
+    </div>
+    <div class="filter-row" style="padding-top:0">
+      <small class="muted" id="filter-summary"></small>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div id="global-notices"></div>
+
+    <section id="view-empty" class="view is-active"></section>
+    <section id="view-overview" class="view"></section>
+    <section id="view-impact" class="view"></section>
+    <section id="view-initiatives" class="view"></section>
+    <section id="view-review" class="view"></section>
+    <section id="view-data" class="view"></section>
+  </div>
+</main>
+
+<script type="module" src="js/app.mjs"></script>
+</body>
+</html>

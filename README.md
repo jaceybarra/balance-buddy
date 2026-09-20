@@ -1,3 +1,23 @@
+## Professional Impact Portfolio
+
+This repository also contains [`impact-portfolio/`](impact-portfolio/) — a
+**local-only** dashboard that turns the monthly PDF export of a professional
+development document into an evidence-linked view of contributions, outcomes and
+development.
+
+```bash
+cd impact-portfolio
+npm start           # http://127.0.0.1:4178
+```
+
+It is deliberately outside `app/`, because `app/` is deployed to GitHub Pages on
+every push to `main` and this dashboard must never be published. It has no runtime
+dependencies, makes no network calls, and keeps source PDFs and personal data out of
+version control. See [impact-portfolio/README.md](impact-portfolio/README.md) and
+[impact-portfolio/MONTHLY_UPDATE.md](impact-portfolio/MONTHLY_UPDATE.md).
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
