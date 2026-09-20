@@ -17,8 +17,14 @@ export function tempHome() {
 /**
  * Write a small, valid, uncompressed PDF with one content stream per page.
  * Enough to prove page-aware extraction; not a general-purpose PDF writer.
+ *
+ * `style: 'wordprocessor'` reproduces the layout a Google Docs / Word export
+ * actually produces: one BT...ET block per glyph, the line position carried in the
+ * CTM via `cm` rather than in the text matrix, and each glyph placed with its own
+ * relative `Td`. Text extracted from that shape is only correct if the reader
+ * tracks the full graphics and text state.
  */
-export function writePdf(file, pages) {
+export function writePdf(file, pages, { style = 'simple' } = {}) {
   const objects = [];
   const pageCount = pages.length;
   const fontObj = 3 + pageCount * 2;
@@ -34,9 +40,11 @@ export function writePdf(file, pages) {
     const contentNum = pageNum + 1;
     objects[pageNum] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] ` +
       `/Resources << /Font << /F1 ${fontObj} 0 R >> >> /Contents ${contentNum} 0 R >>`;
-    const body = ['BT', '/F1 11 Tf', '14 TL', '54 730 Td']
-      .concat(lines.flatMap((l) => [`(${esc(l)}) Tj`, 'T*']))
-      .concat(['ET']).join('\n');
+    const body = style === 'wordprocessor'
+      ? wordProcessorStream(lines, esc)
+      : ['BT', '/F1 11 Tf', '14 TL', '54 730 Td']
+        .concat(lines.flatMap((l) => [`(${esc(l)}) Tj`, 'T*']))
+        .concat(['ET']).join('\n');
     objects[contentNum] = `<< /Length ${body.length} >>\nstream\n${body}\nendstream`;
   });
 
@@ -60,6 +68,30 @@ export function writePdf(file, pages) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, out, 'latin1');
   return file;
+}
+
+/**
+ * Every glyph in its own text block, positioned by an accumulating Td, with the
+ * line's y coordinate coming from the CTM. Helvetica's widths are unknown to the
+ * writer, so glyph advances use a fixed pitch and word gaps are made wide enough
+ * to be unambiguous.
+ */
+function wordProcessorStream(lines, esc) {
+  const out = [];
+  const PITCH = 6.2;
+  const SPACE = 9.5;
+  lines.forEach((line, row) => {
+    const y = 730 - row * 16;
+    let x = 0;
+    out.push('q', `1 0 0 1 54 ${y} cm`);
+    for (const ch of line) {
+      if (ch === ' ') { x += SPACE; continue; }
+      out.push('BT', '/F1 11 Tf', '1 0 0 1 0 0 Tm', `${x.toFixed(3)} 0 Td`, `(${esc(ch)}) Tj`, 'ET');
+      x += PITCH;
+    }
+    out.push('Q');
+  });
+  return out.join('\n');
 }
 
 /** A tiny weekly-summary document, as the real export would look. */

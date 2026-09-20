@@ -135,6 +135,31 @@ not optional.
 `documentedPeriods` is one date per weekly entry you find. Coverage accounting uses
 it to decide which months are complete, partial, or absent.
 
+### Never retype a quote - pull it
+
+`tools/build-import.mjs` exists so excerpts cannot drift from the source. Write a
+small builder that imports it and cites by *needle* rather than by transcription:
+
+```js
+import { E, emit } from './build-import.mjs';
+
+// E(page, source, reportingPeriod, needle) finds the bullet on that page that
+// contains `needle`, stores it verbatim, and returns its id. A needle that no
+// longer matches throws, so a citation can never point at text that is not there.
+const ev = E(34, 'zoom', '2026-08-21', 'verify 221 of 243');
+```
+
+It folds page-break continuations back together, strips section headings that got
+glued to a bullet, and de-duplicates repeated quotes. Run it with the import id:
+
+```bash
+node tools/my-import.mjs <importId>
+```
+
+Per-import builders are git-ignored (`tools/real-*.mjs`), because they embed
+quotes, customer names and colleague names from your document. `build-import.mjs`
+itself is generic and is committed.
+
 ### The rules the validator enforces
 
 1. **No excerpt, no record.** Every contribution, metric and learning cites at least one.
@@ -266,5 +291,6 @@ run against a copy without touching the real dataset.
 | `ingest` refuses: sections still pending | the analysis is incomplete | finish it, or `--force` and accept that the skipped sections are reported as unresolved |
 | `ingest` aborts on validation errors | a record breaks a blocking rule | read `FAILED_VALIDATION.txt`, fix `candidates.json`, run again. The dashboard is untouched |
 | A record you expected has vanished | it was edited out of the source | it is flagged `missing_in_latest_export`, not deleted — see **Data & refresh** in the dashboard |
+| Extracted text is garbled or one letter per line | an unusual font or layout the extractor mishandles | install poppler-utils and re-run with `--engine pdftotext`, then report the page so the native extractor can be fixed |
 | Two exports disagree about a number | a genuine contradiction | both are kept; resolve it with a correction |
 | The refresh made things worse | | `node bin/portfolio.mjs rollback` |

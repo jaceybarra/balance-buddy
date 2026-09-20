@@ -144,14 +144,17 @@ function ledeText({ ds, kept, completed, deliverables, ongoing, proposals, repor
   parts.push(el('span', {}, 'Across '), el('strong', { text: `${range.label}` }), el('span', {}, ', the document records '));
   parts.push(el('strong', { text: `${kept.length} distinct contribution${kept.length === 1 ? '' : 's'}` }));
   parts.push(el('span', {}, ` spanning ${projects.size} initiative${projects.size === 1 ? '' : 's'} for ${customers.size} customer${customers.size === 1 ? '' : 's'}. `));
-  parts.push(el('strong', { text: `${deliverables.length} deliverable${deliverables.length === 1 ? '' : 's'}` }));
-  parts.push(el('span', {}, ` completed, ${ongoing.length} initiative${ongoing.length === 1 ? '' : 's'} still in progress`));
-  if (proposals.length) parts.push(el('span', {}, `, and ${proposals.length} idea${proposals.length === 1 ? '' : 's'} discussed but not implemented`));
+  parts.push(el('span', {}, 'Of those, '));
+  parts.push(el('strong', { text: `${deliverables.length} produced a deliverable` }));
+  parts.push(el('span', {}, `, ${ongoing.length} ${ongoing.length === 1 ? 'is' : 'are'} still in progress`));
+  if (proposals.length) {
+    parts.push(el('span', {}, `, and ${proposals.length} ${proposals.length === 1 ? 'was an idea' : 'were ideas'} discussed but not implemented`));
+  }
   parts.push(el('span', {}, '. '));
   if (reportedOutcomes.length) {
     const one = reportedOutcomes.length === 1;
     parts.push(el('span', { class: 'qualifier' },
-      `${one ? 'One' : reportedOutcomes.length} of these ${one ? 'carries' : 'carry'} an outcome stated in the source` +
+      `${one ? 'One record' : `${reportedOutcomes.length} records`} ${one ? 'carries' : 'carry'} an outcome stated in the source` +
       (achieved.length
         ? `, and ${achieved.length === 1 ? 'one carries' : `${achieved.length} carry`} a measured value.`
         : ', though none carries a measured value.')));

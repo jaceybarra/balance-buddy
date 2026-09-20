@@ -11,6 +11,11 @@ source-pdfs/*
 work/*
 !work/.gitkeep
 
+# Per-import analysis builders: these embed quotes, customer names and colleague
+# names from the source document, so they are personal data too. build-import.mjs
+# is generic infrastructure and IS committed.
+tools/real-*.mjs
+
 # The real dataset, import history, corrections and version snapshots
 data/*
 !data/.gitkeep

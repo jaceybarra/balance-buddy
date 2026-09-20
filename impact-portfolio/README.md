@@ -165,8 +165,22 @@ coverage · contradictions surfacing instead of overwriting · data surviving a 
 
 ## Known limitations
 
-See the "Remaining limitations" section of the top-level handover notes, or in short:
-the source is two AI summaries and nothing here verifies them; extraction is
-text-layer only (scanned pages are flagged, not OCR'd); the analysis step needs a
-Claude Code session and is not fully automatic; and record matching across revised
-exports is a heuristic that can leave a `possible_duplicate` flag for you to judge.
+- **The source is two AI summaries and nothing here verifies them.** Every claim is
+  traceable to a quote and a page; none of it is independently confirmed.
+- **Which tool wrote which entry is inferred, not stated.** The document never names
+  Gemini or Zoom. Entries are labelled by their layout: the
+  `Week Ending / ACTIVITIES / TASKS / WINS` format is labelled `gemini`, and the
+  `Executive Summary / Key Wins / Metrics & Data Points / Actions & Tasks` format is
+  labelled `zoom`. If that is backwards, one correction fixes it - see
+  MONTHLY_UPDATE.md.
+- **Extraction is text-layer only.** Scanned pages are flagged as needing OCR, not
+  read. Superscript citation markers in the source (Gemini-style reference numbers)
+  come through glued to the preceding word, because a text layer carries no
+  superscript flag.
+- **The analysis step needs a Claude Code session.** Extraction, reconciliation and
+  validation are automatic; turning prose into structured records is not.
+- **Record matching across revised exports is a heuristic.** Strong matches merge;
+  weak ones are flagged `possible_duplicate` for you to judge. A substantially
+  rewritten entry may arrive as a new record with the old one flagged as absent.
+- **Aggregation is deliberately near-silent.** Expect very few totals: most stated
+  numbers are customer context, estimates or targets, none of which may be summed.

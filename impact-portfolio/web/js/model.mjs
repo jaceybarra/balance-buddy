@@ -208,7 +208,9 @@ export function aggregatableGroups(metrics) {
   }
   return [...groups.entries()].map(([group, members]) => ({
     group,
-    label: members[0].label,
+    // Members are often labelled "... (first batch)" / "... (second batch)"; the
+    // total belongs to the shared subject, not to one member's label.
+    label: members[0].label.replace(/\s*\([^)]*\)\s*$/, ''),
     unit: members[0].unit,
     total: members.reduce((a, m) => a + (Number(m.value) || 0), 0),
     members

@@ -12,6 +12,12 @@ import zlib from 'node:zlib';
 
 const DEC = new TextDecoder('latin1');
 
+// Set for the duration of one extraction. The latin1 decoding of the file is reused
+// rather than redone per stream - with dozens of fonts across dozens of pages that
+// difference is the whole run time.
+let CURRENT_BYTES = null;
+let CURRENT_STR = null;
+
 export function extractPdfText(buffer) {
   const bytes = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
   const objects = scanObjects(bytes);
@@ -81,6 +87,64 @@ function expandObjectStreams(bytes, objects) {
   }
 }
 
+/**
+ * Return the body of the dictionary stored under /Key, following an indirect
+ * reference if that is what is there.
+ *
+ * A regex cannot do this: `/Resources <</ExtGState <</G3 3 0 R>> /Font <<...>>>>`
+ * nests, and matching to the first `>>` silently truncates the dictionary - which
+ * is how every font on the page came to be missed.
+ */
+function dictFor(body, key, objects) {
+  const re = new RegExp(`/${key}\\s*`, 'g');
+  let m;
+  while ((m = re.exec(body)) !== null) {
+    const rest = body.slice(m.index + m[0].length);
+    if (rest.startsWith('<<')) {
+      const inner = balancedDict(rest);
+      if (inner !== null) return inner;
+    }
+    const ref = /^(\d+)\s+\d+\s+R/.exec(rest);
+    if (ref && objects.has(Number(ref[1]))) {
+      const target = objects.get(Number(ref[1])).body;
+      const at = target.indexOf('<<');
+      if (at !== -1) {
+        const inner = balancedDict(target.slice(at));
+        if (inner !== null) return inner;
+      }
+    }
+  }
+  return null;
+}
+
+/** `src` must start with '<<'. Returns the contents up to the matching '>>'. */
+function balancedDict(src) {
+  if (!src.startsWith('<<')) return null;
+  let depth = 0;
+  let i = 0;
+  while (i < src.length) {
+    if (src.startsWith('<<', i)) { depth++; i += 2; continue; }
+    if (src.startsWith('>>', i)) {
+      depth--; i += 2;
+      if (depth === 0) return src.slice(2, i - 2);
+      continue;
+    }
+    if (src[i] === '(') {
+      // Skip literal strings so a ')' or '>>' inside one cannot unbalance the scan.
+      let d = 1; i++;
+      while (i < src.length && d > 0) {
+        if (src[i] === '\\') { i += 2; continue; }
+        if (src[i] === '(') d++;
+        else if (src[i] === ')') d--;
+        i++;
+      }
+      continue;
+    }
+    i++;
+  }
+  return null;
+}
+
 function dictValue(body, key) {
   const m = new RegExp(`/${key}\\s+(\\d+)`).exec(body);
   return m ? m[1] : null;
@@ -93,7 +157,7 @@ function refValue(body, key) {
 
 function decodeStream(obj, objects, bytes) {
   if (obj.fromObjStm) return null;
-  const s = DEC.decode(bytes);
+  const s = (bytes === CURRENT_BYTES && CURRENT_STR) ? CURRENT_STR : DEC.decode(bytes);
   const startTag = s.indexOf('stream', obj.offset);
   if (startTag === -1) return null;
   let p = startTag + 'stream'.length;
@@ -277,47 +341,103 @@ function pageContent(pageObj, objects, bytes) {
 function buildFontMap(pageObj, objects) {
   const fonts = new Map();
   if (!pageObj) return fonts;
-  let resBody = null;
-  const inline = /\/Resources\s*<<([\s\S]*?)>>\s*(?:\/|>>)/.exec(pageObj.body);
-  const resRef = refValue(pageObj.body, 'Resources');
-  if (inline) resBody = inline[1];
-  else if (resRef !== null && objects.has(resRef)) resBody = objects.get(resRef).body;
-  if (!resBody) return fonts;
 
-  let fontBody = null;
-  const fInline = /\/Font\s*<<([\s\S]*?)>>/.exec(resBody);
-  const fRef = refValue(resBody, 'Font');
-  if (fInline) fontBody = fInline[1];
-  else if (fRef !== null && objects.has(fRef)) fontBody = objects.get(fRef).body;
+  const resBody = dictFor(pageObj.body, 'Resources', objects);
+  if (!resBody) return fonts;
+  const fontBody = dictFor(resBody, 'Font', objects);
   if (!fontBody) return fonts;
 
   for (const m of fontBody.matchAll(/\/([A-Za-z0-9#+._-]+)\s+(\d+)\s+\d+\s+R/g)) {
     const name = m[1];
-    const fontObj = objects.get(Number(m[2]));
+    const num = Number(m[2]);
+    if (FONT_CACHE.has(num)) { fonts.set(name, FONT_CACHE.get(num)); continue; }
+    const fontObj = objects.get(num);
     if (!fontObj) continue;
-    fonts.set(name, describeFont(fontObj, objects));
+    const described = describeFont(fontObj, objects);
+    FONT_CACHE.set(num, described);
+    fonts.set(name, described);
   }
   return fonts;
 }
 
+// Fonts are shared across pages; parsing each ToUnicode CMap once is enough.
+const FONT_CACHE = new Map();
+
 function describeFont(fontObj, objects) {
-  const twoByte = /\/Subtype\s*\/Type0/.test(fontObj.body) || /Identity-[HV]/.test(fontObj.body);
+  const body = fontObj.body;
+  const twoByte = /\/Subtype\s*\/Type0/.test(body) || /Identity-[HV]/.test(body);
+
   let toUnicode = null;
-  const tuRef = refValue(fontObj.body, 'ToUnicode');
+  const tuRef = refValue(body, 'ToUnicode');
   if (tuRef !== null && objects.has(tuRef)) {
     try {
-      const o = objects.get(tuRef);
-      const data = o.__pdfBytes ? null : null; // placeholder; filled by caller-scope decode below
-      toUnicode = parseCMapFromObject(o, objects, data);
+      toUnicode = parseCMapFromObject(objects.get(tuRef), objects);
     } catch { toUnicode = null; }
   }
-  return { twoByte, toUnicode };
+
+  // Glyph advances, in 1/1000 em. Without these there is no way to tell the gap
+  // between two letters from the gap between two words, because word processors
+  // position every glyph individually.
+  const widths = new Map();
+  let defaultWidth = twoByte ? 1000 : 500;
+
+  if (twoByte) {
+    const dfRef = /\/DescendantFonts\s*\[\s*(\d+)\s+\d+\s+R/.exec(body);
+    const df = dfRef && objects.has(Number(dfRef[1])) ? objects.get(Number(dfRef[1])).body : null;
+    if (df) {
+      const dw = /\/DW\s+(\d+)/.exec(df);
+      if (dw) defaultWidth = Number(dw[1]);
+      const wArr = /\/W\s*\[([\s\S]*?)\]\s*(?:\/|>>)/.exec(df);
+      if (wArr) parseCidWidths(wArr[1], widths);
+    }
+  } else {
+    const first = Number(dictValue(body, 'FirstChar') ?? NaN);
+    const wRef = /\/Widths\s*(?:\[([\s\S]*?)\]|(\d+)\s+\d+\s+R)/.exec(body);
+    let list = null;
+    if (wRef?.[1]) list = wRef[1];
+    else if (wRef?.[2] && objects.has(Number(wRef[2]))) {
+      const t = objects.get(Number(wRef[2])).body;
+      list = (/\[([\s\S]*?)\]/.exec(t) ?? [])[1] ?? null;
+    }
+    if (list && Number.isFinite(first)) {
+      list.trim().split(/\s+/).map(Number).forEach((w, i) => {
+        if (Number.isFinite(w)) widths.set(first + i, w);
+      });
+    }
+    const mw = /\/MissingWidth\s+(\d+)/.exec(body);
+    if (mw) defaultWidth = Number(mw[1]);
+  }
+
+  return { twoByte, toUnicode, widths, defaultWidth };
 }
 
-// The ToUnicode stream must be decoded with access to the raw file; the extractor
-// closure below re-binds `decodeStream`. To keep this readable we stash the file
-// buffer on the module scope during extraction.
-let CURRENT_BYTES = null;
+/**
+ * The /W array of a CID font is a mix of two forms:
+ *   c [w1 w2 w3]      widths for c, c+1, c+2
+ *   cFirst cLast w    one width for the whole range
+ */
+function parseCidWidths(src, out) {
+  const toks = src.match(/\[[^\]]*\]|-?[\d.]+/g) ?? [];
+  let i = 0;
+  while (i < toks.length) {
+    const start = Number(toks[i]);
+    if (!Number.isFinite(start)) { i++; continue; }
+    const next = toks[i + 1];
+    if (next && next.startsWith('[')) {
+      const list = next.slice(1, -1).trim().split(/\s+/).map(Number);
+      list.forEach((w, k) => { if (Number.isFinite(w)) out.set(start + k, w); });
+      i += 2;
+    } else if (next !== undefined && toks[i + 2] !== undefined) {
+      const last = Number(next);
+      const w = Number(toks[i + 2]);
+      if (Number.isFinite(last) && Number.isFinite(w) && last - start < 65536) {
+        for (let c = start; c <= last; c++) out.set(c, w);
+      }
+      i += 3;
+    } else break;
+  }
+}
+
 function parseCMapFromObject(obj, objects) {
   if (!CURRENT_BYTES) return null;
   const data = decodeStream(obj, objects, CURRENT_BYTES);
@@ -356,69 +476,186 @@ function hexToStr(hex) {
 
 /* ------------------------------------------------------------ content stream */
 
+/**
+ * Run the text-showing operators of a content stream and reconstruct reading order.
+ *
+ * This needs a real state machine rather than a regex sweep. Word processors export
+ * one BT...ET block per glyph, carry the line position in the CTM (`cm`) rather than
+ * in the text matrix, and place each glyph with its own `Td`. Line breaks are only
+ * visible once the text matrix and the CTM are composed, so both are tracked here,
+ * including the q/Q graphics stack.
+ */
 function renderTextOps(content, fonts) {
   let out = '';
+
+  let ctm = IDENTITY.slice();
+  const gsStack = [];
+
+  let tm = null;    // text matrix (the pen)
+  let tlm = null;   // text line matrix (where the current line began)
+
   let font = null;
-  let lastY = null;
+  let fontSize = 0;
+  let charSpacing = 0;
+  let wordSpacing = 0;
+  let hScale = 1;
+  let leading = 0;
+
+  // Device-space position where the previous run finished drawing.
   let lastX = null;
-  let pendingNewline = false;
+  let lastY = null;
 
   const tokens = tokenize(content);
+
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
     if (t.type !== 'op') continue;
     const op = t.value;
     const args = collectArgs(tokens, i);
+    const nums = args.filter((a) => a.type === 'number').map((a) => a.value);
 
     switch (op) {
+      case 'q': gsStack.push(ctm.slice()); break;
+      case 'Q': ctm = gsStack.pop() ?? ctm; break;
+      case 'cm': if (nums.length >= 6) ctm = matMul(nums.slice(-6), ctm); break;
+
+      case 'BT': tm = IDENTITY.slice(); tlm = IDENTITY.slice(); break;
+      case 'ET': tm = null; tlm = null; break;
+
       case 'Tf': {
         const nameTok = args.find((a) => a.type === 'name');
         font = nameTok ? fonts.get(nameTok.value) ?? null : null;
+        if (nums.length) fontSize = Math.abs(nums[nums.length - 1]);
         break;
       }
-      case 'BT': lastY = null; lastX = null; break;
-      case 'ET': pendingNewline = true; break;
-      case 'Td': case 'TD': {
-        const y = num(args[args.length - 1]);
-        const x = num(args[args.length - 2]);
-        if (lastY !== null && Math.abs(y) > 0.01) pendingNewline = true;
-        lastY = y; lastX = x;
+      case 'Tc': charSpacing = nums.length ? nums[nums.length - 1] : 0; break;
+      case 'Tw': wordSpacing = nums.length ? nums[nums.length - 1] : 0; break;
+      case 'Tz': hScale = nums.length ? nums[nums.length - 1] / 100 : 1; break;
+      case 'TL': leading = nums.length ? nums[nums.length - 1] : 0; break;
+
+      case 'Tm':
+        if (nums.length >= 6) { tlm = nums.slice(-6); tm = tlm.slice(); }
         break;
-      }
-      case 'Tm': {
-        const y = num(args[args.length - 1]);
-        const x = num(args[args.length - 2]);
-        if (lastY !== null && Math.abs(y - lastY) > 1.5) pendingNewline = true;
-        else if (lastX !== null && x - lastX > 8) out += ' ';
-        lastY = y; lastX = x;
-        break;
-      }
-      case 'T*': pendingNewline = true; break;
-      case 'Tj': case "'": case '"': {
-        const strTok = [...args].reverse().find((a) => a.type === 'string');
-        if (op !== 'Tj') pendingNewline = true;
-        if (strTok) {
-          if (pendingNewline) { out += '\n'; pendingNewline = false; }
-          out += decodeString(strTok, font);
+
+      case 'TD':
+        if (nums.length >= 2) leading = -nums[nums.length - 1];
+        // falls through
+      case 'Td':
+        if (nums.length >= 2 && tlm) {
+          tlm = matMul([1, 0, 0, 1, nums[nums.length - 2], nums[nums.length - 1]], tlm);
+          tm = tlm.slice();
         }
         break;
+
+      case 'T*':
+        if (tlm) { tlm = matMul([1, 0, 0, 1, 0, -leading], tlm); tm = tlm.slice(); }
+        break;
+
+      case 'Tj': case "'": case '"': {
+        if (op !== 'Tj' && tlm) { tlm = matMul([1, 0, 0, 1, 0, -leading], tlm); tm = tlm.slice(); }
+        const strTok = [...args].reverse().find((a) => a.type === 'string');
+        if (!strTok || !tm) break;
+        const run = showText(strTok, font);
+        out = place(out, run.text);
+        step(run.mille, run.glyphs ?? strTok.bytes.length, countSpaces(run.text), run.singleByte);
+        break;
       }
+
       case 'TJ': {
         const arrTok = [...args].reverse().find((a) => a.type === 'array');
-        if (arrTok) {
-          if (pendingNewline) { out += '\n'; pendingNewline = false; }
-          for (const el of arrTok.items) {
-            if (el.type === 'string') out += decodeString(el, font);
-            else if (el.type === 'number' && el.value < -120) out += ' ';
+        if (!arrTok || !tm) break;
+        let text = '';
+        let mille = 0;
+        let glyphs = 0;
+        let single = true;
+        for (const elem of arrTok.items) {
+          if (elem.type === 'string') {
+            const r = showText(elem, font);
+            text += r.text;
+            mille += r.mille;
+            glyphs += r.singleByte ? elem.bytes.length : Math.floor(elem.bytes.length / 2);
+            single = single && r.singleByte;
+          } else if (elem.type === 'number') {
+            // A kern this wide is a space the glyph widths do not express.
+            if (elem.value < -120 && text && !/\s$/.test(text)) text += ' ';
+            mille -= elem.value;
           }
         }
+        out = place(out, text);
+        step(mille, glyphs, countSpaces(text), single);
         break;
       }
+
       default: break;
     }
   }
+
   return out;
+
+  /** Device-space origin and scale of the pen right now. */
+  function pen() {
+    const m = matMul(tm, ctm);
+    const scale = Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2])) || 1;
+    return { x: m[4], y: m[5], scale };
+  }
+
+  /** Decide newline / space from where this run starts, then append it. */
+  function place(acc, text) {
+    if (!text) return acc;
+    const { x, y, scale } = pen();
+    const size = (fontSize || 10) * scale;
+
+    if (lastY !== null) {
+      if (Math.abs(y - lastY) > Math.max(LINE_EPSILON, size * 0.35)) {
+        acc += '\n';
+      } else if (x - lastX > Math.max(size * SPACE_RATIO, 0.5) &&
+                 acc && !/\s$/.test(acc) && !/^\s/.test(text)) {
+        acc += ' ';
+      }
+    }
+    return acc + text;
+  }
+
+  /** Advance the pen by the width of the run just drawn. */
+  function step(mille, glyphs, spaces, singleByte) {
+    const tx = ((mille / 1000) * fontSize + charSpacing * glyphs + (singleByte ? wordSpacing * spaces : 0)) * hScale;
+    tm = matMul([1, 0, 0, 1, tx, 0], tm);
+    const p = pen();
+    lastX = p.x;
+    lastY = p.y;
+  }
 }
+
+const IDENTITY = [1, 0, 0, 1, 0, 0];
+
+/** PDF matrices are row-vector [a b c d e f]. */
+function matMul(m1, m2) {
+  const [a1, b1, c1, d1, e1, f1] = m1;
+  const [a2, b2, c2, d2, e2, f2] = m2;
+  return [
+    a1 * a2 + b1 * c2,
+    a1 * b2 + b1 * d2,
+    c1 * a2 + d1 * c2,
+    c1 * b2 + d1 * d2,
+    e1 * a2 + f1 * c2 + e2,
+    e1 * b2 + f1 * d2 + f2
+  ];
+}
+
+function countSpaces(text) {
+  let n = 0;
+  for (const ch of text) if (ch === ' ') n++;
+  return n;
+}
+
+// A baseline shift smaller than this is styling (ligatures, superscripts), not a
+// new line. Body line spacing is an order of magnitude larger.
+// Baseline shifts smaller than this are styling (ligature runs, superscripts),
+// not a new line. Body line spacing is an order of magnitude larger.
+const LINE_EPSILON = 2.0;
+
+// A horizontal gap wider than this share of the font size reads as a word space.
+const SPACE_RATIO = 0.17;
 
 function num(tok) { return tok && tok.type === 'number' ? tok.value : 0; }
 
@@ -431,22 +668,27 @@ function collectArgs(tokens, opIndex) {
   return args;
 }
 
-function decodeString(tok, font) {
+function showText(tok, font) {
   const bytes = tok.bytes;
+  let text = '';
+  let mille = 0;
+  const width = (code) => font?.widths?.get(code) ?? font?.defaultWidth ?? 500;
+
   if (font && font.twoByte) {
-    let out = '';
     for (let i = 0; i + 1 < bytes.length; i += 2) {
       const code = (bytes[i] << 8) | bytes[i + 1];
-      out += font.toUnicode?.get(code) ?? (code >= 32 && code < 0xd800 ? String.fromCharCode(code) : '');
+      text += font.toUnicode?.get(code) ?? (code >= 32 && code < 0xd800 ? String.fromCharCode(code) : '');
+      mille += width(code);
     }
-    return out;
+    return { text, mille, singleByte: false };
   }
-  let out = '';
+
   for (const b of bytes) {
-    if (font?.toUnicode?.has(b)) out += font.toUnicode.get(b);
-    else out += WINANSI[b] ?? (b >= 32 ? String.fromCharCode(b) : '');
+    if (font?.toUnicode?.has(b)) text += font.toUnicode.get(b);
+    else text += WINANSI[b] ?? (b >= 32 ? String.fromCharCode(b) : '');
+    mille += width(b);
   }
-  return out;
+  return { text, mille, singleByte: true };
 }
 
 const WINANSI = {
@@ -560,5 +802,13 @@ function tidy(s) {
 const _extract = extractPdfText;
 export default function extract(buffer) {
   CURRENT_BYTES = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
-  try { return _extract(CURRENT_BYTES); } finally { CURRENT_BYTES = null; }
+  CURRENT_STR = DEC.decode(CURRENT_BYTES);
+  FONT_CACHE.clear();
+  try {
+    return _extract(CURRENT_BYTES);
+  } finally {
+    CURRENT_BYTES = null;
+    CURRENT_STR = null;
+    FONT_CACHE.clear();
+  }
 }

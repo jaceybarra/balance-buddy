@@ -47,6 +47,33 @@ test('extraction keeps physical page numbers and flags pages needing OCR', () =>
   for (const s of sections) assert.ok(s.pageStart >= 1 && s.pageEnd <= 6);
 });
 
+test('text is reconstructed from a word-processor layout: one block per glyph, line position in the CTM', () => {
+  // This is the shape a real Google Docs / Word export produces. Reading it needs
+  // the full graphics and text state: glyph advances alone give neither the word
+  // gaps nor the line breaks, because every glyph carries its own position and the
+  // line's y coordinate lives in the CTM rather than the text matrix.
+  const file = writePdf(path.join(HOME, 'source-pdfs', 'wp.pdf'),
+    devDocPages({ extraWeek: true }), { style: 'wordprocessor' });
+  const ex = extractPdf(file);
+
+  assert.equal(ex.pageCount, 5);
+  const page2 = ex.pages[1].text;
+
+  assert.match(page2, /Gemini summary - Week of 2026-05-08/, 'words must not be split into letters');
+  assert.match(page2, /intake triage discovery session/);
+  assert.ok(!/\bR a n\b/.test(page2), 'letters must not be spaced apart');
+  assert.equal(page2.split('\n').length, 3, 'each source line must be one output line');
+  assert.match(ex.pages[2].text, /Zoom AI summary/, 'page order is preserved');
+
+  // The same content in the simple layout must read the same.
+  const simple = extractPdf(writePdf(path.join(HOME, 'source-pdfs', 'simple.pdf'),
+    devDocPages({ extraWeek: true })));
+  assert.equal(
+    ex.pages[1].text.replace(/\s+/g, ' '),
+    simple.pages[1].text.replace(/\s+/g, ' '),
+    'both layouts must yield the same text');
+});
+
 test('the same PDF always produces the same content hash; a changed PDF does not', () => {
   const a = writePdf(path.join(HOME, 'source-pdfs', 'a.pdf'), devDocPages());
   const b = writePdf(path.join(HOME, 'source-pdfs', 'b.pdf'), devDocPages());
