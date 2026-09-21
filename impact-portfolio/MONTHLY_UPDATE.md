@@ -227,8 +227,10 @@ sections · sections left unresolved.
 ## 5. Look at it
 
 ```bash
-npm start            # http://127.0.0.1:4178
+npm start            # opens http://127.0.0.1:4178 in your browser
 ```
+
+On a Mac you can double-click **`Start dashboard.command`** in Finder instead.
 
 Bound to localhost only. Nothing is published and nothing connects to email, Zoom
 or Drive.

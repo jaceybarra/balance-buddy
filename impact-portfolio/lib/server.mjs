@@ -4,6 +4,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 import { ROOT, DATASET_FILE, DEMO_FILE, OVERRIDES_FILE, readJSON } from './dataset.mjs';
 
 const TYPES = {
@@ -19,7 +20,28 @@ const TYPES = {
 
 const WEB = path.join(ROOT, 'web');
 
-export function startServer({ port = 4178 } = {}) {
+/**
+ * Ask the operating system to open a URL in the default browser.
+ * Local only: this hands a loopback address to the platform's own opener and
+ * never reaches the network itself. Failure is not an error - the URL is printed
+ * either way.
+ */
+function openInBrowser(url) {
+  const cmd = process.platform === 'darwin' ? 'open'
+    : process.platform === 'win32' ? 'cmd'
+    : 'xdg-open';
+  const args = process.platform === 'win32' ? ['/c', 'start', '', url] : [url];
+  try {
+    const child = spawn(cmd, args, { stdio: 'ignore', detached: true });
+    child.on('error', () => { /* no opener available; the printed URL is the fallback */ });
+    child.unref();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function startServer({ port = 4178, open = false } = {}) {
   const server = http.createServer((req, res) => {
     try {
       handle(req, res);
@@ -34,7 +56,11 @@ export function startServer({ port = 4178 } = {}) {
         reject(new Error(`Port ${port} is already in use. Try: npm start -- --port ${port + 1}`));
       } else reject(err);
     });
-    server.listen(port, '127.0.0.1', () => resolve(`http://127.0.0.1:${port}/`));
+    server.listen(port, '127.0.0.1', () => {
+      const url = `http://127.0.0.1:${port}/`;
+      if (open) openInBrowser(url);
+      resolve(url);
+    });
   });
 }
 

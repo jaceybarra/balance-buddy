@@ -17,8 +17,39 @@ cd impact-portfolio
 npm start
 ```
 
-Then open <http://127.0.0.1:4178>. That is the whole install: Node 18.17+ and nothing
-else. There are zero runtime dependencies.
+Your browser opens on <http://127.0.0.1:4178>. That is the whole install: Node
+18.17+ and nothing else. There are zero runtime dependencies, so there is no
+`npm install` step. Pass `--no-open` to stay in the terminal.
+
+### On a Mac, from scratch
+
+1. **Install Node.js** if `node --version` says 18.17 or lower, or nothing at all.
+   Download the **LTS** installer from <https://nodejs.org>, or `brew install node`.
+2. **Get the code.**
+   ```bash
+   git clone -b claude/eager-brown-m6hedq https://github.com/jaceybarra/balance-buddy.git
+   cd balance-buddy/impact-portfolio
+   ```
+3. **Load your history**, if you have a backup from another machine:
+   ```bash
+   node bin/portfolio.mjs restore ~/Downloads/impact-portfolio-backup-<span>.json
+   ```
+4. **Check and run.**
+   ```bash
+   node bin/portfolio.mjs doctor
+   npm start
+   ```
+
+After that, **double-click `Start dashboard.command`** in Finder whenever you want
+it. It finds a free port, tells you plainly if Node is missing or too old, and
+stops when you close the window.
+
+The first time macOS may refuse to run it because it was downloaded:
+*right-click → Open → Open*, once. Or in Terminal:
+`xattr -d com.apple.quarantine "Start dashboard.command"`.
+
+**Nothing to see it with?** The exported HTML file needs no install at all - just
+double-click it. See *A page you can just open* below.
 
 With no PDF imported you get an honest empty state plus a clearly labelled
 **synthetic demo** you can switch on to see how the dashboard behaves. The demo lives

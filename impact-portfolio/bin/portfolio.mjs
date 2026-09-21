@@ -7,7 +7,7 @@
 //   portfolio status                 what is in the dataset right now
 //   portfolio correct <file.json>    append corrections to data/overrides.json
 //   portfolio rollback               restore the previous dataset snapshot
-//   portfolio serve [--port 4178]    run the dashboard locally
+//   portfolio serve [--port 4178]    run the dashboard locally (opens your browser)
 //   portfolio export [--demo] [--out f]  write a single self-contained HTML page
 //   portfolio doctor                 check this machine: no deps, no network, data present
 //   portfolio backup [--out f]       copy your dataset and corrections to one portable file
@@ -495,9 +495,10 @@ function cmdExport() {
 
 async function cmdServe() {
   const port = Number(flags.port ?? 4178);
-  const url = await startServer({ port, open: !flags['no-open'] });
+  const autoOpen = flags['no-open'] !== true;
+  const url = await startServer({ port, open: autoOpen });
   console.log(`\n  Professional Impact Portfolio`);
-  console.log(`  ${url}`);
+  console.log(`  ${url}${autoOpen ? '   (opening in your browser\u2026)' : ''}`);
   console.log(`  Serving local files only. No network calls, no external services.`);
   console.log(`  Ctrl-C to stop.\n`);
 }
