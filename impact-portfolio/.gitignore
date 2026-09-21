@@ -25,6 +25,7 @@ impact-summary-*.md
 impact-summary-*.txt
 impact-portfolio-*.html
 !impact-portfolio-demo-*.html
+impact-portfolio-backup-*.json
 
 # Local noise
 .DS_Store

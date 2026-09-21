@@ -29,6 +29,32 @@ npm start -- --port 4200    # if 4178 is taken
 npm test                    # the verification suite
 ```
 
+### Verify it is local
+
+```bash
+node bin/portfolio.mjs doctor
+```
+
+Reads the files that will actually run and reports what it found: runtime
+dependencies, any absolute URL referenced anywhere in `web/`, `lib/` or `bin/`,
+the address the server binds to, whether anything personal is tracked by git, and
+what data is present. It exits non-zero if any of that stops being true, so a
+change that reaches the network shows up here rather than in a packet capture.
+
+### Your history lives in one place - keep a copy
+
+`data/` is deliberately out of version control, which means your dataset, your
+corrections and your import log exist in exactly one directory. Make that portable:
+
+```bash
+node bin/portfolio.mjs backup                     # -> impact-portfolio-backup-<span>.json
+node bin/portfolio.mjs restore <that file>        # on another machine, or after a reinstall
+```
+
+The backup holds data and no code, so restoring it can change what the dashboard
+shows but never how it behaves. Restore refuses to replace a dataset covering a
+different period unless you pass `--force`, and snapshots whatever was there first.
+
 ### A page you can just open
 
 ```bash
@@ -126,7 +152,8 @@ current view.
 
 ```
 impact-portfolio/
-  bin/portfolio.mjs      the CLI: extract · ingest · validate · status · correct · rollback · serve · export
+  bin/portfolio.mjs      the CLI: extract · ingest · validate · status · correct · rollback
+                         · serve · export · doctor · backup · restore
   lib/
     pdf/native.mjs       dependency-free, page-aware PDF text extraction
     pdf/extract.mjs      tiered extraction (native → pdftotext → pdfjs) and sectioning
@@ -138,6 +165,8 @@ impact-portfolio/
     dataset.mjs          versioned, atomic, crash-safe storage
     server.mjs           localhost-only static server
     export.mjs           single-file HTML snapshot builder
+    doctor.mjs           local-only health check
+    backup.mjs           portable copy of your dataset and corrections
   web/                   the dashboard (vanilla ES modules, no build step)
   demo/                  synthetic demo dataset - committed, isolated, never merged
   test/                  the verification suite

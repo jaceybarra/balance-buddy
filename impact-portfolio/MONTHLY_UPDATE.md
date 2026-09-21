@@ -13,10 +13,19 @@ to follow this file without reading any other document.
 
 ```bash
 cd impact-portfolio
-node --version     # needs 18.17 or newer
+node --version                    # needs 18.17 or newer
+node bin/portfolio.mjs doctor     # confirms there is nothing to install and nothing to reach
 ```
 
-No install step. There are no dependencies to fetch and nothing here makes a network call.
+No install step. There are no dependencies to fetch and nothing here makes a network
+call - `doctor` checks that against the files that will actually run.
+
+**Back up before you start.** `data/` holds your entire history and is kept out of
+version control, so it exists in one place only:
+
+```bash
+node bin/portfolio.mjs backup
+```
 
 ---
 
@@ -285,6 +294,9 @@ node -e "require('./data/portfolio.json').contributions.forEach(c=>console.log(c
 ```bash
 node bin/portfolio.mjs status       # version, coverage, counts, open conflicts
 node bin/portfolio.mjs export       # one self-contained HTML file, opens offline
+node bin/portfolio.mjs doctor       # prove it is local: no deps, no network, nothing tracked
+node bin/portfolio.mjs backup       # portable copy of your dataset and corrections
+node bin/portfolio.mjs restore <f>  # load one back, on this machine or another
 node bin/portfolio.mjs validate     # re-run every rule over the live dataset
 node bin/portfolio.mjs rollback     # restore the previous snapshot from data/versions/
 npm test                            # the verification suite

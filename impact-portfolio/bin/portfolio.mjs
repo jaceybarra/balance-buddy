@@ -9,6 +9,9 @@
 //   portfolio rollback               restore the previous dataset snapshot
 //   portfolio serve [--port 4178]    run the dashboard locally
 //   portfolio export [--demo] [--out f]  write a single self-contained HTML page
+//   portfolio doctor                 check this machine: no deps, no network, data present
+//   portfolio backup [--out f]       copy your dataset and corrections to one portable file
+//   portfolio restore <file>         load a backup into data/ (refuses to clobber silently)
 //
 // Nothing here makes a network call.
 
@@ -23,6 +26,8 @@ import { deriveGaps } from '../lib/gaps.mjs';
 import { formatReport } from '../lib/report.mjs';
 import { startServer } from '../lib/server.mjs';
 import { buildStandalone } from '../lib/export.mjs';
+import { runDoctor } from '../lib/doctor.mjs';
+import { makeBackup, restoreBackup } from '../lib/backup.mjs';
 import { emptyDataset } from '../lib/schema.mjs';
 import {
   ROOT, WORK_DIR, DATA_DIR, DATASET_FILE, PDF_DIR, ensureDirs, loadDataset, loadOverrides,
@@ -51,6 +56,9 @@ async function main() {
     case 'rollback': return cmdRollback();
     case 'serve': return cmdServe();
     case 'export': return cmdExport();
+    case 'doctor': return cmdDoctor();
+    case 'backup': return cmdBackup();
+    case 'restore': return cmdRestore();
     default: return usage();
   }
 }
@@ -423,6 +431,47 @@ import. An import can never silently overwrite them.`);
 function cmdRollback() {
   const from = rollback();
   console.log(`✔ Restored ${path.relative(ROOT, from)} to data/portfolio.json`);
+}
+
+/* ------------------------------------------------------------------- doctor */
+
+function cmdDoctor() {
+  const checks = runDoctor();
+  const mark = { pass: '✔', warn: '!', fail: '✖' };
+  console.log('\nProfessional Impact Portfolio - local health check\n');
+  for (const c of checks) {
+    console.log(`  ${mark[c.state]} ${c.name.padEnd(34)} ${c.detail}`);
+  }
+  const failed = checks.filter((c) => c.state === 'fail');
+  const warned = checks.filter((c) => c.state === 'warn');
+  console.log('');
+  if (failed.length) {
+    console.log(`✖ ${failed.length} check(s) failed. This install is not behaving as a local-only tool.\n`);
+    process.exitCode = 1;
+  } else {
+    console.log(`✔ Everything runs on this machine. No dependencies, no network, nothing published.` +
+      (warned.length ? `  (${warned.length} note${warned.length === 1 ? '' : 's'} above.)` : '') + '\n');
+  }
+}
+
+/* ------------------------------------------------------------------- backup */
+
+function cmdBackup() {
+  const out = flags.out ? path.resolve(String(flags.out)) : undefined;
+  const r = makeBackup({ out });
+  console.log(`\n✔ Wrote ${displayPath(r.file)}  (${(r.bytes / 1024).toFixed(0)} KB)`);
+  console.log(`  ${r.summary}`);
+  console.log(`  Keep this with your other work files. Restore it with:`);
+  console.log(`    node bin/portfolio.mjs restore ${path.basename(r.file)}\n`);
+}
+
+function cmdRestore() {
+  const file = args.find((a) => !a.startsWith('--'));
+  if (!file) throw new Error('Usage: portfolio restore <backup.json>');
+  const r = restoreBackup(path.resolve(file), { force: flags.force === true });
+  console.log(`\n✔ Restored ${r.summary}`);
+  if (r.snapshot) console.log(`  The dataset that was here was snapshotted to ${displayPath(r.snapshot)}`);
+  console.log(`  Run: npm start\n`);
 }
 
 /* ------------------------------------------------------------------- export */

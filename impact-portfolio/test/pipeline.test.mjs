@@ -14,9 +14,11 @@ const { validateDataset } = await import('../lib/validate.mjs');
 const { applyOverrides, makeOverride } = await import('../lib/overrides.mjs');
 const { buildCoverage } = await import('../lib/coverage.mjs');
 const { deriveGaps } = await import('../lib/gaps.mjs');
-const { commitDataset, loadDataset, writeJSONAtomic, DATASET_FILE, listVersions } = await import('../lib/dataset.mjs');
+const { commitDataset, loadDataset, writeJSONAtomic, DATASET_FILE, OVERRIDES_FILE, listVersions } = await import('../lib/dataset.mjs');
 const { filterContributions, resolveRange, isDefinitive } = await import('../web/js/model.mjs');
 const { buildStandalone } = await import('../lib/export.mjs');
+const { makeBackup, restoreBackup } = await import('../lib/backup.mjs');
+const { runDoctor } = await import('../lib/doctor.mjs');
 
 const meta = (n, hash) => ({
   importId: `imp${n}`, importVersion: n, pdfFileName: `export-${n}.pdf`, fileHash: hash ?? `hash${n}`
@@ -631,4 +633,74 @@ test('a demo export is built from the demo dataset and says so', () => {
   const html = fs.readFileSync(out, 'utf8');
   assert.match(html, /SYNTHETIC DEMONSTRATION DATA/i,
     'a demo export must carry the demo notice with it');
+});
+
+/* ============================================ 16. carrying data between machines */
+
+test('a backup round-trips the dataset, corrections and import log', () => {
+  const before = loadDataset();
+  // Corrections may not exist yet; a backup still has to carry the empty set.
+  const readOverrides = () => (fs.existsSync(OVERRIDES_FILE)
+    ? JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf8'))
+    : { version: 1, entries: [] });
+  const overridesBefore = readOverrides();
+  const bk = path.join(HOME, 'backup.json');
+  const made = makeBackup({ out: bk });
+
+  assert.ok(made.bytes > 100);
+  const payload = JSON.parse(fs.readFileSync(bk, 'utf8'));
+  assert.equal(payload.kind, 'professional-impact-portfolio-backup');
+  assert.ok(!JSON.stringify(payload).includes('function'), 'a backup carries data, never code');
+
+  // Wipe the live data, then bring it back.
+  fs.rmSync(DATASET_FILE);
+  fs.rmSync(OVERRIDES_FILE, { force: true });
+  restoreBackup(bk);
+
+  const after = loadDataset();
+  assert.deepEqual(after.contributions.map((c) => c.id).sort(), before.contributions.map((c) => c.id).sort());
+  assert.deepEqual(after.metrics.map((m) => m.id).sort(), before.metrics.map((m) => m.id).sort());
+  assert.equal(after.excerpts.length, before.excerpts.length);
+  assert.equal(after.datasetVersion, before.datasetVersion);
+  assert.ok(fs.existsSync(OVERRIDES_FILE), 'restore must write the corrections file, even when empty');
+  assert.deepEqual(readOverrides(), overridesBefore);
+});
+
+test('restore rejects a file that is not a backup, and a schema it does not understand', () => {
+  const notABackup = path.join(HOME, 'random.json');
+  fs.writeFileSync(notABackup, JSON.stringify({ hello: 'world' }));
+  assert.throws(() => restoreBackup(notABackup), /not a Professional Impact Portfolio backup/);
+
+  const wrongSchema = path.join(HOME, 'future.json');
+  const good = JSON.parse(fs.readFileSync(makeBackup({ out: path.join(HOME, 'tmp-bk.json') }).file, 'utf8'));
+  fs.writeFileSync(wrongSchema, JSON.stringify({ ...good, schemaVersion: good.schemaVersion + 99 }));
+  assert.throws(() => restoreBackup(wrongSchema), /schema version/);
+});
+
+test('restore will not silently replace a different dataset, and snapshots before it does', () => {
+  const bk = path.join(HOME, 'other-period.json');
+  const payload = JSON.parse(fs.readFileSync(makeBackup({ out: path.join(HOME, 'tmp2.json') }).file, 'utf8'));
+  payload.dataset.coverage = { ...payload.dataset.coverage, sourceEnd: '2027-01-01' };
+  fs.writeFileSync(bk, JSON.stringify(payload));
+
+  assert.throws(() => restoreBackup(bk), /Pass --force/);
+  const stillHere = loadDataset();
+  assert.notEqual(stillHere.coverage.sourceEnd, '2027-01-01', 'the refusal must change nothing');
+
+  const before = listVersions().length;
+  const r = restoreBackup(bk, { force: true });
+  assert.ok(r.snapshot, 'the replaced dataset must be snapshotted');
+  assert.equal(listVersions().length, before + 1);
+  assert.equal(loadDataset().coverage.sourceEnd, '2027-01-01');
+});
+
+test('the health check finds nothing that reaches outside this machine', () => {
+  const checks = runDoctor();
+  const failed = checks.filter((c) => c.state === 'fail');
+  assert.deepEqual(failed, [], `failing checks: ${failed.map((f) => `${f.name}: ${f.detail}`).join('; ')}`);
+
+  const byName = Object.fromEntries(checks.map((c) => [c.name, c]));
+  assert.equal(byName['Runtime dependencies'].detail, 'none - there is nothing to install');
+  assert.match(byName['External origins'].detail, /^none/);
+  assert.match(byName['Server binding'].detail, /127\.0\.0\.1/);
 });
