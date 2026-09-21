@@ -13,7 +13,7 @@ to follow this file without reading any other document.
 
 ```bash
 cd impact-portfolio
-node --version                    # needs 18.17 or newer
+node --version                    # Node 18 or newer (18.0.0 is verified to work)
 node bin/portfolio.mjs doctor     # confirms there is nothing to install and nothing to reach
 ```
 

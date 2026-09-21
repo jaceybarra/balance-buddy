@@ -23,9 +23,15 @@ export function runDoctor() {
 
   /* ---------------------------------------------------------------- runtime */
 
-  const major = Number(process.versions.node.split('.')[0]);
-  if (major >= 18) ok('Node version', `${process.versions.node}`);
-  else bad('Node version', `${process.versions.node} - this project needs 18.17 or newer`);
+  // Verified against Node 18.0.0: every command and the dashboard itself work.
+  // `npm test` is the one exception - node --test was only unflagged in 18.13.
+  const [major, minor] = process.versions.node.split('.').map(Number);
+  const canTest = major > 18 || (major === 18 && minor >= 13);
+  if (major >= 18) {
+    ok('Node version', `${process.versions.node}${canTest ? '' : ' - fine to use; npm test needs 18.13+'}`);
+  } else {
+    bad('Node version', `${process.versions.node} - this project needs Node 18 or newer`);
+  }
 
   const pkg = readJSON(path.join(ROOT, 'package.json'), {});
   const deps = Object.keys(pkg.dependencies ?? {});

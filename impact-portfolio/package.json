@@ -4,8 +4,12 @@
   "private": true,
   "description": "Local, evidence-linked dashboard built from monthly PDF exports of a professional development document. No network calls, no external AI services.",
   "type": "module",
-  "engines": { "node": ">=18.17" },
-  "bin": { "portfolio": "./bin/portfolio.mjs" },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "portfolio": "./bin/portfolio.mjs"
+  },
   "scripts": {
     "start": "node bin/portfolio.mjs serve",
     "serve": "node bin/portfolio.mjs serve",

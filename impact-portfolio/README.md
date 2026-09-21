@@ -17,14 +17,19 @@ cd impact-portfolio
 npm start
 ```
 
-Your browser opens on <http://127.0.0.1:4178>. That is the whole install: Node
-18.17+ and nothing else. There are zero runtime dependencies, so there is no
+Your browser opens on <http://127.0.0.1:4178>. That is the whole install: **Node 18
+or newer** and nothing else. There are zero runtime dependencies, so there is no
 `npm install` step. Pass `--no-open` to stay in the terminal.
+
+Verified working on Node 18.0.0, including the 64-page extraction. The one
+exception is `npm test`, which needs 18.13+ because `node --test` was flagged
+before then - that affects developing the tool, not using it.
 
 ### On a Mac, from scratch
 
-1. **Install Node.js** if `node --version` says 18.17 or lower, or nothing at all.
-   Download the **LTS** installer from <https://nodejs.org>, or `brew install node`.
+1. **Check Node.js:** `node --version`. Anything from **v18.0.0** up is fine. If
+   it is older or missing, install the **LTS** build from <https://nodejs.org>, or
+   `brew install node`.
 2. **Get the code.**
    ```bash
    git clone -b claude/eager-brown-m6hedq https://github.com/jaceybarra/balance-buddy.git

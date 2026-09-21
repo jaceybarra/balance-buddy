@@ -10,7 +10,7 @@ printf '\nProfessional Impact Portfolio\n\n'
 
 if ! command -v node >/dev/null 2>&1; then
   cat <<'MSG'
-Node.js is not installed, and this tool needs it (version 18.17 or newer).
+Node.js is not installed, and this tool needs it (version 18 or newer).
 
   Install it either way:
     - Download the "LTS" installer from https://nodejs.org  (simplest), or
@@ -25,7 +25,7 @@ fi
 
 MAJOR=$(node -p "process.versions.node.split('.')[0]")
 if [ "$MAJOR" -lt 18 ]; then
-  printf 'Node %s is installed, but this tool needs 18.17 or newer.\n' "$(node -v)"
+  printf 'Node %s is installed, but this tool needs version 18 or newer.\n' "$(node -v)"
   printf 'Update from https://nodejs.org and try again.\n\n'
   read -r -p "Press Return to close." _
   exit 1
