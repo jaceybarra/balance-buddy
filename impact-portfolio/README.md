@@ -29,6 +29,19 @@ npm start -- --port 4200    # if 4178 is taken
 npm test                    # the verification suite
 ```
 
+### A page you can just open
+
+```bash
+node bin/portfolio.mjs export          # -> impact-portfolio-<start>_to_<end>.html
+node bin/portfolio.mjs export --demo   # the synthetic demo instead
+```
+
+This writes **one self-contained HTML file** - dashboard, data and all - that opens
+by double-clicking. No server, no build step, and it makes no network requests at
+all, so it works on a plane or from a USB stick. It is a snapshot and says so on
+the page: re-export after each monthly refresh. It contains real customer names, so
+use the anonymise option in Review-ready summaries before sending it to anyone.
+
 ---
 
 ## The monthly refresh
@@ -113,7 +126,7 @@ current view.
 
 ```
 impact-portfolio/
-  bin/portfolio.mjs      the CLI: extract · ingest · validate · status · correct · rollback · serve
+  bin/portfolio.mjs      the CLI: extract · ingest · validate · status · correct · rollback · serve · export
   lib/
     pdf/native.mjs       dependency-free, page-aware PDF text extraction
     pdf/extract.mjs      tiered extraction (native → pdftotext → pdfjs) and sectioning
@@ -124,6 +137,7 @@ impact-portfolio/
     gaps.mjs             what the source does not say
     dataset.mjs          versioned, atomic, crash-safe storage
     server.mjs           localhost-only static server
+    export.mjs           single-file HTML snapshot builder
   web/                   the dashboard (vanilla ES modules, no build step)
   demo/                  synthetic demo dataset - committed, isolated, never merged
   test/                  the verification suite

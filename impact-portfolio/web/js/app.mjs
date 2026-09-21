@@ -26,6 +26,19 @@ async function init() {
   restorePrefs();
   wireChrome();
 
+  // A standalone export carries its dataset inline and never calls fetch.
+  if (window.__PIP_DATA__) {
+    state.ds = window.__PIP_DATA__;
+    state.mode = state.ds.mode === 'demo' ? 'demo' : 'real';
+    if (state.mode === 'demo') {
+      const band = document.getElementById('demo-band');
+      band.hidden = false;
+    }
+    document.getElementById('standalone-note')?.removeAttribute('hidden');
+    boot();
+    return;
+  }
+
   let serverState = null;
   try {
     serverState = await (await fetch('api/state')).json();

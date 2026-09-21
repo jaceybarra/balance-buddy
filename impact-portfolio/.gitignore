@@ -20,9 +20,11 @@ tools/real-*.mjs
 data/*
 !data/.gitkeep
 
-# Generated exports
+# Generated exports (they embed the dataset, so they are personal data too)
 impact-summary-*.md
 impact-summary-*.txt
+impact-portfolio-*.html
+!impact-portfolio-demo-*.html
 
 # Local noise
 .DS_Store

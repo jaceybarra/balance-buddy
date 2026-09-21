@@ -224,6 +224,17 @@ npm start            # http://127.0.0.1:4178
 Bound to localhost only. Nothing is published and nothing connects to email, Zoom
 or Drive.
 
+To take it away from the machine, export a snapshot:
+
+```bash
+node bin/portfolio.mjs export
+```
+
+That writes one self-contained HTML file that opens by double-clicking, with no
+server and no network access. Re-export after each refresh - the file does not
+update itself, and it says so on the page. It carries real customer names, so
+anonymise before sharing it.
+
 ---
 
 ## Corrections that survive future refreshes
@@ -273,6 +284,7 @@ node -e "require('./data/portfolio.json').contributions.forEach(c=>console.log(c
 
 ```bash
 node bin/portfolio.mjs status       # version, coverage, counts, open conflicts
+node bin/portfolio.mjs export       # one self-contained HTML file, opens offline
 node bin/portfolio.mjs validate     # re-run every rule over the live dataset
 node bin/portfolio.mjs rollback     # restore the previous snapshot from data/versions/
 npm test                            # the verification suite

@@ -8,6 +8,7 @@
 //   portfolio correct <file.json>    append corrections to data/overrides.json
 //   portfolio rollback               restore the previous dataset snapshot
 //   portfolio serve [--port 4178]    run the dashboard locally
+//   portfolio export [--demo] [--out f]  write a single self-contained HTML page
 //
 // Nothing here makes a network call.
 
@@ -21,6 +22,7 @@ import { buildCoverage } from '../lib/coverage.mjs';
 import { deriveGaps } from '../lib/gaps.mjs';
 import { formatReport } from '../lib/report.mjs';
 import { startServer } from '../lib/server.mjs';
+import { buildStandalone } from '../lib/export.mjs';
 import { emptyDataset } from '../lib/schema.mjs';
 import {
   ROOT, WORK_DIR, DATA_DIR, DATASET_FILE, PDF_DIR, ensureDirs, loadDataset, loadOverrides,
@@ -48,6 +50,7 @@ async function main() {
     case 'correct': return cmdCorrect();
     case 'rollback': return cmdRollback();
     case 'serve': return cmdServe();
+    case 'export': return cmdExport();
     default: return usage();
   }
 }
@@ -420,6 +423,23 @@ import. An import can never silently overwrite them.`);
 function cmdRollback() {
   const from = rollback();
   console.log(`✔ Restored ${path.relative(ROOT, from)} to data/portfolio.json`);
+}
+
+/* ------------------------------------------------------------------- export */
+
+function cmdExport() {
+  const outArg = flags.out ? path.resolve(String(flags.out)) : undefined;
+  const { file, bytes, ds } = buildStandalone({ demo: flags.demo === true, out: outArg });
+  console.log(`\n✔ Wrote ${displayPath(file)}  (${(bytes / 1024).toFixed(0)} KB)`);
+  console.log(`  ${ds.contributions.length} contributions · ${ds.metrics.length} metric observations · ` +
+    `${ds.excerpts.length} source excerpts`);
+  console.log(`  Source covers ${ds.coverage?.sourceStart ?? '—'} to ${ds.coverage?.sourceEnd ?? '—'}.`);
+  console.log(`  Open it by double-clicking. It needs no server and makes no network calls.`);
+  if (!flags.demo) {
+    console.log(`  It contains customer names - anonymise in Review-ready summaries before sharing.\n`);
+  } else {
+    console.log('');
+  }
 }
 
 /* -------------------------------------------------------------------- serve */

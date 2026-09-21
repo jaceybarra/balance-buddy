@@ -16,6 +16,7 @@ const { buildCoverage } = await import('../lib/coverage.mjs');
 const { deriveGaps } = await import('../lib/gaps.mjs');
 const { commitDataset, loadDataset, writeJSONAtomic, DATASET_FILE, listVersions } = await import('../lib/dataset.mjs');
 const { filterContributions, resolveRange, isDefinitive } = await import('../web/js/model.mjs');
+const { buildStandalone } = await import('../lib/export.mjs');
 
 const meta = (n, hash) => ({
   importId: `imp${n}`, importVersion: n, pdfFileName: `export-${n}.pdf`, fileHash: hash ?? `hash${n}`
@@ -572,3 +573,62 @@ function fixtureImport() {
     learnings: []
   };
 }
+
+/* ================================================= 15. standalone export ==== */
+
+test('the standalone export is a single file that runs with no server', () => {
+  // Uses whatever the earlier tests committed to this temp HOME.
+  const out = path.join(HOME, 'snapshot.html');
+  const { file, bytes, ds } = buildStandalone({ out });
+
+  assert.equal(file, out);
+  assert.ok(bytes > 5000, 'the export should not be an empty shell');
+  const html = fs.readFileSync(out, 'utf8');
+
+  // No module syntax may survive the concatenation.
+  const leftovers = html.split('\n').filter((l) => /^\s*(import|export)\s/.test(l));
+  assert.deepEqual(leftovers, [], `module syntax left in the bundle: ${leftovers.slice(0, 3).join(' | ')}`);
+
+  // Nothing may be loaded from elsewhere.
+  assert.ok(!/src="js\//.test(html), 'scripts must be inlined');
+  assert.ok(!/href="css\//.test(html), 'stylesheets must be inlined');
+  assert.ok(!/https?:\/\//.test(html.replace(/https?:\/\/www\.w3\.org[^"']*/g, '')),
+    'the page must not reference any remote origin');
+
+  // The dataset travels with it.
+  assert.match(html, /window\.__PIP_DATA__ = \{/);
+  const inlined = JSON.parse(html.match(/window\.__PIP_DATA__ = (\{.*?\});<\/script>/s)[1]
+    .replace(/\\u003c/g, '<').replace(/\\u003e/g, '>'));
+  assert.equal(inlined.contributions.length, ds.contributions.length);
+  assert.equal(inlined.excerpts.length, ds.excerpts.length);
+
+  // A snapshot has to say it is one.
+  assert.match(html, /Offline snapshot/);
+  assert.match(html, /This file does not update/);
+
+  // A '<' inside any record cannot end the script element early.
+  assert.ok(!/<\/script>/i.test(html.match(/window\.__PIP_DATA__ = .*?;<\/script>/s)[0].slice(0, -9)),
+    'embedded JSON must not contain a closing script tag');
+});
+
+test('the export refuses to run when the dataset is missing', () => {
+  const aside = `${DATASET_FILE}.moved`;
+  fs.renameSync(DATASET_FILE, aside);
+  try {
+    assert.throws(() => buildStandalone({ out: path.join(HOME, 'never.html') }),
+      /No dataset yet/);
+    assert.equal(fs.existsSync(path.join(HOME, 'never.html')), false,
+      'a failed export must not leave a half-written file');
+  } finally {
+    fs.renameSync(aside, DATASET_FILE);
+  }
+});
+
+test('a demo export is built from the demo dataset and says so', () => {
+  const out = path.join(HOME, 'demo-snapshot.html');
+  const { ds } = buildStandalone({ demo: true, out });
+  assert.equal(ds.mode, 'demo');
+  const html = fs.readFileSync(out, 'utf8');
+  assert.match(html, /SYNTHETIC DEMONSTRATION DATA/i,
+    'a demo export must carry the demo notice with it');
+});
